@@ -132,7 +132,13 @@ const BatchPage: React.FC = () => {
         {filteredBatches.length > 0 ? (
           <View>
             {filteredBatches.map(batch => (
-              <BatchCard key={batch.id} batch={batch} />
+              <BatchCard
+                key={batch.id}
+                batch={batch}
+                onClick={() => Taro.navigateTo({ url: `/pages/batch-detail/index?id=${batch.id}` })}
+                showArrow
+                showExhausted
+              />
             ))}
           </View>
         ) : (

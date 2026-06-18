@@ -1,0 +1,388 @@
+@use '../../styles/theme.scss' as *;
+@use '../../styles/variables.scss' as *;
+
+.batchDetailPage {
+  min-height: 100vh;
+  padding: 0 $page-padding;
+  padding-bottom: 60rpx;
+  padding-top: $spacing-lg;
+  box-sizing: border-box;
+  background: $color-bg-page;
+}
+
+.overviewCard {
+  background: linear-gradient(135deg, $color-secondary 0%, $color-primary 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-xl $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: 0 8rpx 24rpx rgba(229, 57, 53, 0.18);
+  color: $color-text-white;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    right: -60rpx;
+    top: -60rpx;
+    width: 200rpx;
+    height: 200rpx;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: -40rpx;
+    bottom: -80rpx;
+    width: 160rpx;
+    height: 160rpx;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 50%;
+  }
+
+  .batchNo {
+    font-size: $font-size-xxl;
+    font-weight: $font-weight-bold;
+    letter-spacing: 1rpx;
+    margin-bottom: $spacing-md;
+    position: relative;
+    z-index: 1;
+  }
+
+  .tagsRow {
+    display: flex;
+    gap: $spacing-sm;
+    align-items: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+
+  .bloodTypeBadge {
+    padding: 8rpx 20rpx;
+    border-radius: $radius-button;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $color-text-white;
+  }
+
+  .statusBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8rpx;
+    padding: 8rpx 20rpx;
+    border-radius: $radius-button;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+
+    &.normal {
+      background: rgba(0, 180, 42, 0.95);
+      color: $color-text-white;
+    }
+
+    &.near_expiry {
+      background: rgba(255, 125, 0, 0.95);
+      color: $color-text-white;
+    }
+
+    &.expired {
+      background: rgba(245, 63, 63, 0.95);
+      color: $color-text-white;
+    }
+
+    &.locked {
+      background: rgba(134, 144, 156, 0.95);
+      color: $color-text-white;
+    }
+  }
+
+  .daysLabel {
+    font-size: $font-size-xs;
+    opacity: 0.9;
+    margin-left: 4rpx;
+  }
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+
+  .statItem {
+    background: $color-bg-card;
+    border-radius: $radius-md;
+    padding: $spacing-lg $spacing-md;
+    box-shadow: $shadow-card;
+    text-align: center;
+
+    .value {
+      font-size: $font-size-xxl;
+      font-weight: $font-weight-bold;
+      line-height: 1.2;
+      color: $color-text-primary;
+
+      &.danger {
+        color: $color-error;
+      }
+
+      &.primary {
+        color: $color-primary;
+      }
+
+      &.success {
+        color: $color-success;
+      }
+
+      &.warning {
+        color: $color-warning;
+      }
+    }
+
+    .unit {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+      margin-left: 4rpx;
+      font-weight: $font-weight-normal;
+    }
+
+    .label {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      margin-top: $spacing-xs;
+    }
+  }
+}
+
+.infoCard {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+
+  .cardTitle {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-md;
+    padding-bottom: $spacing-sm;
+    border-bottom: 2rpx solid $color-divider;
+  }
+
+  .infoList {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+  }
+
+  .infoRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .label {
+      font-size: $font-size-sm;
+      color: $color-text-tertiary;
+      flex-shrink: 0;
+    }
+
+    .value {
+      font-size: $font-size-sm;
+      color: $color-text-primary;
+      font-weight: $font-weight-medium;
+      text-align: right;
+      @include text-ellipsis;
+      max-width: 60%;
+    }
+  }
+}
+
+.timelineSection {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+
+  .cardTitle {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-md;
+    padding-bottom: $spacing-sm;
+    border-bottom: 2rpx solid $color-divider;
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 48rpx;
+  }
+
+  .timelineLine {
+    position: absolute;
+    left: 11rpx;
+    top: 20rpx;
+    bottom: 0;
+    width: 3rpx;
+    background: $color-border;
+  }
+
+  .timelineItem {
+    position: relative;
+    padding-bottom: $spacing-lg;
+
+    &:last-child {
+      padding-bottom: 0;
+
+      .timelineLine {
+        display: none;
+      }
+    }
+  }
+
+  .timelineDot {
+    position: absolute;
+    left: -48rpx;
+    top: 8rpx;
+    width: 24rpx;
+    height: 24rpx;
+    border-radius: 50%;
+    background: $color-bg-card;
+    border: 4rpx solid $color-border;
+    z-index: 2;
+
+    &.inbound {
+      border-color: $color-success;
+      background: $color-success;
+      box-shadow: 0 0 0 4rpx rgba(0, 180, 42, 0.15);
+    }
+
+    &.outbound {
+      border-color: $color-secondary;
+      background: $color-secondary;
+      box-shadow: 0 0 0 4rpx rgba(25, 118, 210, 0.15);
+    }
+
+    &.exhausted {
+      border-color: $color-warning;
+      background: $color-warning;
+      box-shadow: 0 0 0 4rpx rgba(255, 125, 0, 0.15);
+    }
+
+    &.expired_lock,
+    &.manual_lock,
+    &.manual_unlock,
+    &.adjust {
+      border-color: $color-text-tertiary;
+      background: $color-text-tertiary;
+      box-shadow: 0 0 0 4rpx rgba(134, 144, 156, 0.15);
+    }
+  }
+
+  .logCard {
+    background: $color-bg-page;
+    border-radius: $radius-sm;
+    padding: $spacing-md;
+
+    .logHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: $spacing-sm;
+    }
+
+    .logTypeTag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6rpx;
+      padding: 6rpx 16rpx;
+      border-radius: $radius-xs;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-semibold;
+
+      &.inbound {
+        background: rgba(0, 180, 42, 0.12);
+        color: $color-success;
+      }
+
+      &.outbound {
+        background: rgba(25, 118, 210, 0.12);
+        color: $color-secondary;
+      }
+
+      &.exhausted {
+        background: rgba(255, 125, 0, 0.12);
+        color: $color-warning;
+      }
+
+      &.expired_lock,
+      &.manual_lock,
+      &.manual_unlock,
+      &.adjust {
+        background: rgba(134, 144, 156, 0.12);
+        color: $color-text-tertiary;
+      }
+    }
+
+    .logQty {
+      display: flex;
+      align-items: center;
+      gap: 6rpx;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+
+      &.inbound {
+        color: $color-success;
+      }
+
+      &.outbound {
+        color: $color-secondary;
+      }
+
+      &.exhausted,
+      &.expired_lock,
+      &.manual_lock,
+      &.manual_unlock {
+        color: $color-text-tertiary;
+      }
+
+      &.adjust {
+        color: $color-text-secondary;
+      }
+    }
+
+    .logBalance {
+      font-size: $font-size-xs;
+      color: $color-text-secondary;
+      margin-bottom: $spacing-xs;
+    }
+
+    .logTime {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+    }
+
+    .logExtra {
+      margin-top: $spacing-sm;
+      padding-top: $spacing-sm;
+      border-top: 2rpx dashed $color-divider;
+      font-size: $font-size-xs;
+      color: $color-text-secondary;
+      line-height: 1.6;
+
+      .extraItem {
+        margin-bottom: 4rpx;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+
+      .label {
+        color: $color-text-tertiary;
+      }
+    }
+  }
+}

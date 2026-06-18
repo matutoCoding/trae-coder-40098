@@ -142,6 +142,119 @@
   }
 }
 
+.selfpayList {
+  .selfpayCard {
+    background: $color-bg-card;
+    border-radius: $radius-lg;
+    padding: $spacing-lg;
+    margin-bottom: $spacing-sm;
+    box-shadow: $shadow-card;
+    transition: all $transition-base;
+
+    &.clickable {
+      &:active {
+        transform: scale(0.99);
+        opacity: 0.9;
+        background: $color-bg-hover;
+      }
+    }
+
+    .selfpayHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: $spacing-sm;
+
+      .applyNo {
+        font-size: $font-size-md;
+        font-weight: $font-weight-semibold;
+        color: $color-text-primary;
+      }
+
+      .headerRight {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+      }
+
+      .arrowIcon {
+        font-size: 36rpx;
+        color: $color-text-tertiary;
+        font-weight: 300;
+        line-height: 1;
+      }
+    }
+
+    .statusBadge {
+      padding: 4rpx 16rpx;
+      border-radius: $radius-xs;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-medium;
+
+      &.statusPending {
+        background: rgba(255, 152, 0, 0.12);
+        color: #FF9800;
+      }
+
+      &.statusApproved {
+        background: rgba(0, 180, 42, 0.12);
+        color: #00B42A;
+      }
+
+      &.statusRejected {
+        background: rgba(245, 63, 63, 0.12);
+        color: #F53F3F;
+      }
+    }
+
+    .selfpayRow {
+      display: flex;
+      justify-content: space-between;
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      margin-bottom: 6rpx;
+      align-items: center;
+
+      .muted {
+        color: $color-text-tertiary;
+        margin-left: $spacing-sm;
+      }
+    }
+
+    .dangerText {
+      color: $color-error;
+      font-weight: $font-weight-semibold;
+    }
+
+    .selfpayReason {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+      line-height: 1.5;
+      margin-top: 4rpx;
+    }
+
+    .selfpayApproval {
+      margin-top: $spacing-sm;
+      padding-top: $spacing-sm;
+      border-top: 1rpx solid $color-divider;
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+      display: flex;
+      flex-wrap: wrap;
+      gap: $spacing-xs;
+
+      .muted {
+        color: $color-text-tertiary;
+      }
+
+      .fullWidth {
+        width: 100%;
+        margin-top: 4rpx;
+      }
+    }
+  }
+}
+
 .modalOverlay {
   position: fixed;
   top: 0;

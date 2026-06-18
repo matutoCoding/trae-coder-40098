@@ -30,6 +30,7 @@
 
     .left {
       flex: 1;
+      min-width: 0;
     }
 
     .batchNo {
@@ -45,6 +46,23 @@
       margin-top: $spacing-xs;
       align-items: center;
       flex-wrap: wrap;
+    }
+
+    .arrowIcon {
+      font-size: 40rpx;
+      color: $color-text-tertiary;
+      font-weight: 300;
+      line-height: 1.2;
+      margin-left: $spacing-sm;
+    }
+
+    .exhaustedBadge {
+      padding: 4rpx 12rpx;
+      border-radius: $radius-xs;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-medium;
+      background: rgba(134, 144, 156, 0.15);
+      color: #86909C;
     }
   }
 

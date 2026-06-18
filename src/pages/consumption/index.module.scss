@@ -173,6 +173,43 @@
       }
     }
 
+    .selfpayInfo {
+      margin-top: $spacing-md;
+      padding-top: $spacing-md;
+      border-top: 1rpx solid $color-divider;
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      flex-wrap: wrap;
+
+      .applyNoText {
+        font-size: $font-size-xs;
+        color: $color-text-secondary;
+      }
+
+      .selfpayBadge {
+        padding: 4rpx 12rpx;
+        border-radius: $radius-xs;
+        font-size: 20rpx;
+        font-weight: $font-weight-medium;
+
+        &.badgePending {
+          background: rgba(255, 152, 0, 0.12);
+          color: #FF9800;
+        }
+
+        &.badgeApproved {
+          background: rgba(0, 180, 42, 0.12);
+          color: #00B42A;
+        }
+
+        &.badgeRejected {
+          background: rgba(245, 63, 63, 0.12);
+          color: #F53F3F;
+        }
+      }
+    }
+
     .remark {
       margin-top: $spacing-md;
       padding-top: $spacing-md;

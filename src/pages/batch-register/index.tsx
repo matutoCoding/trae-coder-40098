@@ -8,7 +8,8 @@ import {
   getBatchStatus,
   getDaysToExpiry,
   getBloodTypeColor,
-  validatePhone
+  validatePhone,
+  chooseDate
 } from '@/utils';
 import classnames from 'classnames';
 import type { BloodBatch, BloodType, BatchStatus } from '@/types';
@@ -87,32 +88,18 @@ const BatchRegisterPage: React.FC = () => {
   };
 
   const pickDate = async (kind: 'col' | 'exp') => {
-    try {
-      const res = await (Taro as any).chooseDate({});
-      if (res) {
-        if (kind === 'col') {
-          setCollectionDate(res);
-          if (!expiryDate || dayjs(expiryDate).isBefore(dayjs(res))) {
-            setExpiryDate(dayjs(res).add(35, 'day').format('YYYY-MM-DD'));
-          }
-          setColOpen(false);
-        } else {
-          setExpiryDate(res);
-          setExpOpen(false);
+    const def = kind === 'col' ? collectionDate : expiryDate;
+    const res = await chooseDate(def);
+    if (res) {
+      if (kind === 'col') {
+        setCollectionDate(res);
+        if (!expiryDate || dayjs(expiryDate).isBefore(dayjs(res))) {
+          setExpiryDate(dayjs(res).add(35, 'day').format('YYYY-MM-DD'));
         }
-      }
-    } catch (e) {
-      const def = kind === 'col' ? collectionDate : expiryDate;
-      const y = prompt(`请输入${kind === 'col' ? '采集' : '有效'}日期 (YYYY-MM-DD)`, def);
-      if (y && dayjs(y).isValid()) {
-        if (kind === 'col') {
-          setCollectionDate(y);
-          if (!expiryDate || dayjs(expiryDate).isBefore(dayjs(y))) {
-            setExpiryDate(dayjs(y).add(35, 'day').format('YYYY-MM-DD'));
-          }
-        } else {
-          setExpiryDate(y);
-        }
+        setColOpen(false);
+      } else {
+        setExpiryDate(res);
+        setExpOpen(false);
       }
     }
   };

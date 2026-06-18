@@ -10,10 +10,13 @@ interface BatchCardProps {
   batch: BloodBatch;
   onClick?: () => void;
   showFifoBadge?: boolean;
+  showArrow?: boolean;
+  showExhausted?: boolean;
 }
 
-const BatchCard: React.FC<BatchCardProps> = ({ batch, onClick, showFifoBadge = false }) => {
+const BatchCard: React.FC<BatchCardProps> = ({ batch, onClick, showFifoBadge = false, showArrow = false, showExhausted = false }) => {
   const rate = getUsageRate(batch.usedQuantity, batch.quantity);
+  const isExhausted = batch.remainingQuantity === 0;
 
   const getExpiryBadge = () => {
     if (batch.status === 'expired') {
@@ -42,8 +45,11 @@ const BatchCard: React.FC<BatchCardProps> = ({ batch, onClick, showFifoBadge = f
           <Text className={styles.batchNo}>{batch.batchNo}</Text>
           <View className={styles.tagsRow}>
             <StatusTag type={batch.bloodType} />
+            {showExhausted && isExhausted && (
+              <View className={classnames(styles.exhaustedBadge)}>📦 已清空</View>
+            )}
             <StatusTag type={batch.status} />
-            {showFifoBadge && batch.status !== 'expired' && batch.status !== 'locked' && (
+            {showFifoBadge && batch.status !== 'expired' && batch.status !== 'locked' && !isExhausted && (
               <View style={{
                 fontSize: '22rpx',
                 padding: '4rpx 12rpx',
@@ -55,6 +61,9 @@ const BatchCard: React.FC<BatchCardProps> = ({ batch, onClick, showFifoBadge = f
             )}
           </View>
         </View>
+        {showArrow && (
+          <Text className={styles.arrowIcon}>›</Text>
+        )}
       </View>
 
       <View className={styles.progressRow}>

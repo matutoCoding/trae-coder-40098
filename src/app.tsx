@@ -5,6 +5,8 @@ import { mockQuotaList, mockQuotaDistributionRecords } from '@/data/quota';
 import { mockConsumptionRecords } from '@/data/consumption';
 import { mockBloodBatches } from '@/data/batch';
 import { mockOutboundRecords, mockSelfpayApplications } from '@/data/outbound';
+import { mockDonors } from '@/data/donors';
+import { mockInventoryLogs } from '@/data/inventory-log';
 import './app.scss';
 
 function App(props) {
@@ -27,6 +29,12 @@ function App(props) {
       } : null,
       setSelfpayApplications: state.selfpayApplications.length === 0 ? (list: typeof mockSelfpayApplications) => {
         useAppStore.setState({ selfpayApplications: list });
+      } : null,
+      setDonors: state.donors.length === 0 ? (list: typeof mockDonors) => {
+        useAppStore.setState({ donors: list });
+      } : null,
+      setInventoryLogs: state.inventoryLogs.length === 0 ? (list: typeof mockInventoryLogs) => {
+        useAppStore.setState({ inventoryLogs: list });
       } : null
     };
   });
@@ -40,6 +48,8 @@ function App(props) {
       if (initMockData.setBloodBatches) initMockData.setBloodBatches(mockBloodBatches);
       if (initMockData.setOutboundRecords) initMockData.setOutboundRecords(mockOutboundRecords);
       if (initMockData.setSelfpayApplications) initMockData.setSelfpayApplications(mockSelfpayApplications);
+      if (initMockData.setDonors) initMockData.setDonors(mockDonors);
+      if (initMockData.setInventoryLogs) initMockData.setInventoryLogs(mockInventoryLogs);
       console.log('[App] Mock 数据初始化成功');
     } catch (error) {
       console.error('[App] Mock 数据初始化失败:', error);

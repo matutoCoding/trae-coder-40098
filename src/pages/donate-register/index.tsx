@@ -8,7 +8,8 @@ import {
   validateIdCard,
   validatePhone,
   getBloodTypeColor,
-  generateOrderNo
+  generateOrderNo,
+  chooseDate
 } from '@/utils';
 import classnames from 'classnames';
 import type { BloodType, ConsumptionRecord, SelfpayApply } from '@/types';
@@ -34,17 +35,57 @@ const DonateRegisterPage: React.FC = () => {
   const [orgOpen, setOrgOpen] = useState(false);
   const [selfpayReason, setSelfpayReason] = useState('');
   const [forceShowIntervalError, setForceShowIntervalError] = useState(false);
+  const [donorId, setDonorId] = useState<string>('');
+  const [mode, setMode] = useState<SubmitMode>('quota');
+  const [selfpayApplyNo, setSelfpayApplyNo] = useState<string>('');
 
-  const { quotaList, getQuotaByOrgId, addConsumption, createSelfpayApply, consumptionRecords } = useAppStore();
+  const router = Taro.useRouter();
+  const { selfpayApplyId, prefillIdCard, prefillName } = router.params;
+
+  const {
+    quotaList,
+    getQuotaByOrgId,
+    addConsumption,
+    createSelfpayApply,
+    consumptionRecords,
+    getDonorByIdCard,
+    upsertDonor,
+    selfpayApplications,
+    donors
+  } = useAppStore();
 
   useEffect(() => {
     ORG_OPTIONS.forEach(opt => {
       if (!getQuotaByOrgId(opt.id)) return;
     });
+    if (prefillIdCard) setIdCard(prefillIdCard);
+    if (prefillName) setName(prefillName);
+    if (selfpayApplyId) {
+      const apply = selfpayApplications.find(a => a.id === selfpayApplyId);
+      if (apply && apply.status === 'approved') {
+        Taro.showToast({ title: '自费申请已通过，可继续完成献血登记', icon: 'success' });
+        if (apply.orgId) setOrgId(apply.orgId);
+        if (apply.donorName) setName(apply.donorName);
+        if (apply.donorIdCard) setIdCard(apply.donorIdCard);
+        if (apply.donorBloodType) setBloodType(apply.donorBloodType);
+        if (apply.donorPhone) setPhone(apply.donorPhone);
+        if (apply.lastDonateDate) setLastDonateDate(apply.lastDonateDate);
+        setMode('selfpayApply');
+        setSelfpayApplyNo(apply.applyNo);
+      }
+    }
   }, []);
 
   const currentQuota = useMemo(() => getQuotaByOrgId(orgId) || quotaList[0], [getQuotaByOrgId, orgId, quotaList]);
   const orgName = useMemo(() => ORG_OPTIONS.find(o => o.id === orgId)?.name || '', [orgId]);
+
+  const donateCount = useMemo(() => {
+    if (!idCard) return 0;
+    const donor = donors.find(d => d.idCard === idCard);
+    return donor?.donateCount || 0;
+  }, [donors, idCard]);
+
+  const hasDonorProfile = useMemo(() => !!donorId || donateCount > 0, [donorId, donateCount]);
 
   const intervalCheck = useMemo(() => {
     if (forceShowIntervalError || (name && idCard)) {
@@ -79,7 +120,21 @@ const DonateRegisterPage: React.FC = () => {
     return { ok: true };
   };
 
-  const doSubmit = (mode: SubmitMode) => {
+  const handleIdCardBlur = () => {
+    if (idCard.length >= 15) {
+      const donor = getDonorByIdCard(idCard);
+      if (donor) {
+        Taro.showToast({ title: '已匹配献血者档案，自动回填信息', icon: 'success' });
+        setName(donor.name);
+        setPhone(donor.phone);
+        setBloodType(donor.bloodType);
+        if (donor.lastDonateDate) setLastDonateDate(donor.lastDonateDate);
+        setDonorId(donor.id);
+      }
+    }
+  };
+
+  const doSubmit = (submitMode: SubmitMode) => {
     setForceShowIntervalError(true);
     const req = checkRequired();
     if (!req.ok) {
@@ -97,23 +152,34 @@ const DonateRegisterPage: React.FC = () => {
       return;
     }
 
-    if (mode === 'quota' && !hasQuota) {
+    if (submitMode === 'quota' && !hasQuota && mode !== 'selfpayApply') {
       Taro.showToast({ title: '额度已用完，请选择自费申请', icon: 'none' });
       return;
     }
 
-    if (mode === 'selfpayApply' && hasQuota) {
+    if (submitMode === 'selfpayApply' && hasQuota && mode !== 'selfpayApply') {
       Taro.showToast({ title: '仍有额度，不可申请自费', icon: 'none' });
       return;
     }
 
+    const donor = upsertDonor({
+      idCard: idCard.trim(),
+      name: name.trim(),
+      bloodType: bloodType as BloodType,
+      phone: phone.trim(),
+      lastDonateDate: lastDonateDate || undefined
+    });
+    setDonorId(donor.id);
+
     const today = dayjs().format('YYYY-MM-DD');
     const recordId = `CR${Date.now()}`;
 
-    if (mode === 'quota') {
+    const isSelfpayApprovedFlow = mode === 'selfpayApply' && submitMode === 'selfpayApply';
+
+    if (submitMode === 'quota') {
       const record: ConsumptionRecord = {
         id: recordId,
-        donorId: `DR${Date.now()}`,
+        donorId: donor.id,
         donorName: name.trim(),
         idCard: idCard.trim(),
         bloodType: bloodType as BloodType,
@@ -133,61 +199,82 @@ const DonateRegisterPage: React.FC = () => {
       Taro.showToast({ title: '登记成功，已扣减额度', icon: 'success' });
       setTimeout(() => Taro.navigateBack(), 800);
     } else {
-      if (!selfpayReason.trim()) {
-        Taro.showToast({ title: '请填写自费申请原因', icon: 'none' });
-        return;
+      if (isSelfpayApprovedFlow) {
+        const approvedRecord: ConsumptionRecord = {
+          id: recordId,
+          donorId: donor.id,
+          donorName: name.trim(),
+          idCard: idCard.trim(),
+          bloodType: bloodType as BloodType,
+          orgId,
+          orgName,
+          type: 'selfpay',
+          amount: 1,
+          donateDate: today,
+          intervalCheckPassed: true,
+          daysSinceLastDonate: intervalCheck.days > 0 ? intervalCheck.days : undefined,
+          operator: '系统管理员',
+          phone: phone.trim(),
+          lastDonateDate: lastDonateDate || undefined,
+          remark: `自费申请编号：${selfpayApplyNo}，审批通过已登记`,
+          selfpayApplyNo: selfpayApplyNo,
+          selfpayStatus: 'approved'
+        };
+        addConsumption(approvedRecord);
+        Taro.showToast({ title: '登记成功，自费申请已生效', icon: 'success' });
+        setTimeout(() => Taro.switchTab({ url: '/pages/quota/index' }), 1000);
+      } else {
+        if (!selfpayReason.trim()) {
+          Taro.showToast({ title: '请填写自费申请原因', icon: 'none' });
+          return;
+        }
+        const apply: SelfpayApply = {
+          id: `SA${Date.now()}`,
+          applyNo: generateOrderNo('SP'),
+          orgId,
+          orgName,
+          applicant: name.trim(),
+          applyDate: today,
+          exceedCount: 1,
+          reason: selfpayReason.trim(),
+          status: 'pending',
+          donorPhone: phone.trim(),
+          donorBloodType: bloodType as BloodType,
+          donorIdCard: idCard.trim(),
+          lastDonateDate: lastDonateDate || undefined,
+          remark: '献血登记流程自动发起'
+        };
+        createSelfpayApply(apply);
+        const pendingRecord: ConsumptionRecord = {
+          id: recordId,
+          donorId: donor.id,
+          donorName: name.trim(),
+          idCard: idCard.trim(),
+          bloodType: bloodType as BloodType,
+          orgId,
+          orgName,
+          type: 'selfpay',
+          amount: 1,
+          donateDate: today,
+          intervalCheckPassed: true,
+          daysSinceLastDonate: intervalCheck.days > 0 ? intervalCheck.days : undefined,
+          operator: '待审批',
+          phone: phone.trim(),
+          lastDonateDate: lastDonateDate || undefined,
+          remark: `自费申请编号：${apply.applyNo}，等待审批`,
+          selfpayApplyNo: apply.applyNo,
+          selfpayStatus: 'pending'
+        };
+        addConsumption(pendingRecord);
+        Taro.showToast({ title: '自费申请已提交', icon: 'success' });
+        setTimeout(() => Taro.switchTab({ url: '/pages/quota/index' }), 1000);
       }
-      const apply: SelfpayApply = {
-        id: `SA${Date.now()}`,
-        applyNo: generateOrderNo('SP'),
-        orgId,
-        orgName,
-        applicant: name.trim(),
-        applyDate: today,
-        exceedCount: 1,
-        reason: selfpayReason.trim(),
-        status: 'pending',
-        donorPhone: phone.trim(),
-        donorBloodType: bloodType as BloodType,
-        donorIdCard: idCard.trim(),
-        lastDonateDate: lastDonateDate || undefined,
-        remark: '献血登记流程自动发起'
-      };
-      createSelfpayApply(apply);
-      const pendingRecord: ConsumptionRecord = {
-        id: recordId,
-        donorId: `DR${Date.now()}`,
-        donorName: name.trim(),
-        idCard: idCard.trim(),
-        bloodType: bloodType as BloodType,
-        orgId,
-        orgName,
-        type: 'selfpay',
-        amount: 1,
-        donateDate: today,
-        intervalCheckPassed: true,
-        daysSinceLastDonate: intervalCheck.days > 0 ? intervalCheck.days : undefined,
-        operator: '待审批',
-        phone: phone.trim(),
-        lastDonateDate: lastDonateDate || undefined,
-        remark: `自费申请编号：${apply.applyNo}，等待审批`,
-        selfpayApplyNo: apply.applyNo,
-        selfpayStatus: 'pending'
-      };
-      addConsumption(pendingRecord);
-      Taro.showToast({ title: '自费申请已提交', icon: 'success' });
-      setTimeout(() => Taro.switchTab({ url: '/pages/quota/index' }), 1000);
     }
   };
 
   const pickDate = async () => {
-    try {
-      const res = await Taro.chooseDate({});
-      if (res) setLastDonateDate(res);
-    } catch (e) {
-      const y = prompt('请输入上次献血日期 (格式：YYYY-MM-DD)', lastDonateDate || dayjs().subtract(90, 'day').format('YYYY-MM-DD'));
-      if (y) setLastDonateDate(y);
-    }
+    const res = await chooseDate(lastDonateDate || dayjs().subtract(90, 'day').format('YYYY-MM-DD'));
+    if (res) setLastDonateDate(res);
   };
 
   const orgSelectedName = ORG_OPTIONS.find(o => o.id === orgId)?.name || '请选择所属单位';
@@ -199,6 +286,36 @@ const DonateRegisterPage: React.FC = () => {
           <Text className={styles.icon}>🩸</Text>
           献血人基本信息
         </Text>
+
+        {hasDonorProfile ? (
+          <View style={{
+            padding: '12rpx 20rpx',
+            marginTop: '8rpx',
+            marginBottom: '16rpx',
+            background: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)',
+            borderRadius: '12rpx',
+            display: 'flex',
+            alignItems: 'center'
+          }}>
+            <Text style={{ color: '#2E7D32', fontWeight: '600', fontSize: '26rpx' }}>
+              📋 已登记档案 · 累计献血{donateCount}次
+            </Text>
+          </View>
+        ) : (
+          <View style={{
+            padding: '12rpx 20rpx',
+            marginTop: '8rpx',
+            marginBottom: '16rpx',
+            background: 'linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%)',
+            borderRadius: '12rpx',
+            display: 'flex',
+            alignItems: 'center'
+          }}>
+            <Text style={{ color: '#F57C00', fontWeight: '600', fontSize: '26rpx' }}>
+              ✨ 新建档案 · 首次献血
+            </Text>
+          </View>
+        )}
 
         <View className={styles.formItem}>
           <Text className={styles.label}>
@@ -225,8 +342,24 @@ const DonateRegisterPage: React.FC = () => {
               value={idCard}
               maxLength={18}
               onInput={(e) => setIdCard(e.detail.value.toUpperCase())}
+              onBlur={handleIdCardBlur}
             />
           </View>
+          {donorId && (
+            <View style={{
+              display: 'flex',
+              alignItems: 'center',
+              marginTop: '8rpx',
+              padding: '8rpx 16rpx',
+              background: '#E8F5E9',
+              borderRadius: '8rpx',
+              alignSelf: 'flex-start'
+            }}>
+              <Text style={{ color: '#2E7D32', fontSize: '24rpx', fontWeight: '500' }}>
+                📋 已匹配档案
+              </Text>
+            </View>
+          )}
         </View>
 
         <View className={styles.formItem}>
@@ -305,6 +438,15 @@ const DonateRegisterPage: React.FC = () => {
           所属单位与额度信息
         </Text>
 
+        {mode === 'selfpayApply' && (
+          <View className={classnames(styles.alertBox, styles.success)} style={{ marginBottom: '24rpx' }}>
+            <Text className={styles.alertTitle}>✅ 自费申请已审批通过</Text>
+            <Text className={styles.alertText}>
+              自费申请编号：{selfpayApplyNo}，本次献血按自费登记，无需扣减额度。
+            </Text>
+          </View>
+        )}
+
         <View className={styles.formItem}>
           <Text className={styles.label}>
             <Text className={styles.required}>*</Text>所属单位
@@ -353,7 +495,7 @@ const DonateRegisterPage: React.FC = () => {
         )}
       </View>
 
-      {!hasQuota && currentQuota && (
+      {!hasQuota && currentQuota && mode !== 'selfpayApply' && (
         <View className={styles.formCard}>
           <Text className={styles.formTitle}>
             <Text className={styles.icon}>📋</Text>
@@ -385,7 +527,16 @@ const DonateRegisterPage: React.FC = () => {
       <View style={{ height: 140 }} />
 
       <View className={styles.submitBar}>
-        {hasQuota ? (
+        {mode === 'selfpayApply' ? (
+          <View
+            className={classnames(styles.submitBtn, styles.warning, !intervalCheck.valid && styles.disabled)}
+            onClick={() => doSubmit('selfpayApply')}
+          >
+            {!intervalCheck.valid
+              ? `间隔还差${180 - intervalCheck.days}天`
+              : '✓ 确认登记（自费申请已通过）'}
+          </View>
+        ) : hasQuota ? (
           <View
             className={classnames(styles.submitBtn, !intervalCheck.valid && styles.disabled)}
             onClick={() => doSubmit('quota')}

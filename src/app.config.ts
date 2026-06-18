@@ -8,7 +8,8 @@ export default defineAppConfig({
     'pages/donate-register/index',
     'pages/batch-register/index',
     'pages/outbound-register/index',
-    'pages/selfpay-apply/index'
+    'pages/selfpay-apply/index',
+    'pages/selfpay-detail/index'
   ],
   window: {
     backgroundTextStyle: 'light',

@@ -96,20 +96,8 @@ const QuotaPage: React.FC = () => {
     setCurrentOrgId(orgId);
   };
 
-  const handleSelfpayClick = (applyId: string, status: string) => {
-    if (status === 'pending') {
-      Taro.showActionSheet({
-        itemList: ['通过申请', '拒绝申请', '查看详情'],
-        success: (res) => {
-          if (res.tapIndex === 0) {
-            useAppStore.getState().approveSelfpayApply(applyId, '管理员');
-            Taro.showToast({ title: '已通过', icon: 'success' });
-          } else if (res.tapIndex === 1) {
-            Taro.showToast({ title: '已拒绝', icon: 'none' });
-          }
-        }
-      });
-    }
+  const handleSelfpayClick = (apply: any) => {
+    Taro.navigateTo({ url: `/pages/selfpay-detail/index?id=${apply.id}` });
   };
 
   const tabs = [
@@ -256,63 +244,46 @@ const QuotaPage: React.FC = () => {
             actionText="发起申请"
             onActionClick={() => Taro.navigateTo({ url: '/pages/selfpay-apply/index' })}
           />
-          <View>
+          <View className={styles.selfpayList}>
             {selfpayApplications.length > 0 ? (
               selfpayApplications.map(apply => (
                 <View
                   key={apply.id}
-                  style={{
-                    background: '#fff',
-                    borderRadius: '16rpx',
-                    padding: '32rpx',
-                    marginBottom: '16rpx',
-                    boxShadow: '0 2rpx 12rpx rgba(0,0,0,0.06)'
-                  }}
-                  onClick={() => handleSelfpayClick(apply.id, apply.status)}
+                  className={classnames(styles.selfpayCard, styles.clickable)}
+                  onClick={() => handleSelfpayClick(apply)}
                 >
-                  <View style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16rpx' }}>
-                    <Text style={{ fontSize: '28rpx', fontWeight: '600' }}>{apply.applyNo}</Text>
-                    <View style={{
-                      padding: '4rpx 16rpx',
-                      borderRadius: '8rpx',
-                      fontSize: '22rpx',
-                      fontWeight: '500',
-                      background: apply.status === 'pending'
-                        ? 'rgba(25, 118, 210, 0.12)'
-                        : apply.status === 'approved'
-                        ? 'rgba(0, 180, 42, 0.12)'
-                        : 'rgba(245, 63, 63, 0.12)',
-                      color: apply.status === 'pending'
-                        ? '#1976D2'
-                        : apply.status === 'approved'
-                        ? '#00B42A'
-                        : '#F53F3F'
-                    }}>
-                      {apply.status === 'pending' ? '待审批' : apply.status === 'approved' ? '已通过' : '已拒绝'}
+                  <View className={styles.selfpayHeader}>
+                    <Text className={styles.applyNo}>{apply.applyNo}</Text>
+                    <View className={styles.headerRight}>
+                      <View
+                        className={classnames(
+                          styles.statusBadge,
+                          apply.status === 'pending' && styles.statusPending,
+                          apply.status === 'approved' && styles.statusApproved,
+                          apply.status === 'rejected' && styles.statusRejected
+                        )}
+                      >
+                        {apply.status === 'pending' ? '待审批' : apply.status === 'approved' ? '已通过' : '已驳回'}
+                      </View>
+                      {apply.status === 'pending' && <Text className={styles.arrowIcon}>›</Text>}
                     </View>
                   </View>
-                  <View style={{ fontSize: '26rpx', color: '#4E5969', marginBottom: '8rpx' }}>
+                  <View className={styles.selfpayRow}>
                     <Text>{apply.orgName}</Text>
-                    <Text style={{ marginLeft: '16rpx' }}>申请人：{apply.applicant}</Text>
+                    <Text className={styles.muted}>申请人：{apply.applicant}</Text>
                   </View>
-                  <View style={{ fontSize: '26rpx', color: '#4E5969', marginBottom: '8rpx' }}>
-                    <Text>超额数量：<Text style={{ color: '#E53935', fontWeight: '600' }}>{apply.exceedCount}份</Text></Text>
-                    <Text style={{ marginLeft: '16rpx', color: '#86909C' }}>{apply.applyDate}</Text>
+                  <View className={styles.selfpayRow}>
+                    <Text>超指标数：<Text className={styles.dangerText}>{apply.exceedCount}份</Text></Text>
+                    <Text className={styles.muted}>{apply.applyDate}</Text>
                   </View>
-                  <View style={{ fontSize: '24rpx', color: '#86909C', lineHeight: 1.5 }}>
+                  <View className={styles.selfpayReason}>
                     申请原因：{apply.reason}
                   </View>
                   {apply.approver && (
-                    <View style={{
-                      marginTop: '16rpx',
-                      paddingTop: '16rpx',
-                      borderTop: '1rpx solid #F2F3F5',
-                      fontSize: '22rpx',
-                      color: '#86909C'
-                    }}>
+                    <View className={styles.selfpayApproval}>
                       <Text>审批人：{apply.approver}</Text>
-                      <Text style={{ marginLeft: '16rpx' }}>{apply.approvalDate}</Text>
-                      {apply.approvalRemark && <Text style={{ display: 'block', marginTop: '4rpx' }}>审批意见：{apply.approvalRemark}</Text>}
+                      <Text className={styles.muted}>{apply.approvalDate}</Text>
+                      {apply.approvalRemark && <Text className={styles.fullWidth}>审批意见：{apply.approvalRemark}</Text>}
                     </View>
                   )}
                 </View>

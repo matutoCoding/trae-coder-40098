@@ -10,6 +10,8 @@ export type OutboundStatus = 'pending' | 'approved' | 'rejected' | 'completed';
 
 export type ApplyStatus = 'pending' | 'approved' | 'rejected';
 
+export type InventoryLogType = 'inbound' | 'outbound' | 'exhausted' | 'expired_lock' | 'manual_lock' | 'manual_unlock' | 'adjust';
+
 export interface Organization {
   id: string;
   name: string;
@@ -112,6 +114,7 @@ export interface SelfpayApply {
   orgName: string;
   applicant: string;
   applicantPhone?: string;
+  donorName?: string;
   donorPhone?: string;
   donorBloodType?: BloodType;
   donorIdCard?: string;
@@ -124,6 +127,7 @@ export interface SelfpayApply {
   approvalDate?: string;
   approvalRemark?: string;
   remark?: string;
+  rejectReason?: string;
 }
 
 export interface DashboardStats {
@@ -147,4 +151,22 @@ export interface StatCardItem {
   trend?: string;
   color?: string;
   bgColor?: string;
+}
+
+export interface InventoryLog {
+  id: string;
+  batchId: string;
+  batchNo: string;
+  bloodType: BloodType;
+  logType: InventoryLogType;
+  changeQty: number;
+  balanceQty: number;
+  logTime: string;
+  operator: string;
+  relatedNo?: string;
+  remark?: string;
+  receiver?: string;
+  receiverDept?: string;
+  receiverPhone?: string;
+  purpose?: string;
 }

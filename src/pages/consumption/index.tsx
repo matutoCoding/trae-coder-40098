@@ -150,6 +150,24 @@ const ConsumptionPage: React.FC = () => {
                   </View>
                 </View>
 
+                {record.selfpayApplyNo && (
+                  <View className={styles.selfpayInfo}>
+                    <Text className={styles.applyNoText}>申请单号：{record.selfpayApplyNo}</Text>
+                    {record.selfpayStatus && (
+                      <View
+                        className={classnames(
+                          styles.selfpayBadge,
+                          record.selfpayStatus === 'pending' && styles.badgePending,
+                          record.selfpayStatus === 'approved' && styles.badgeApproved,
+                          record.selfpayStatus === 'rejected' && styles.badgeRejected
+                        )}
+                      >
+                        {record.selfpayStatus === 'pending' ? '待审批' : record.selfpayStatus === 'approved' ? '已通过' : '已驳回'}
+                      </View>
+                    )}
+                  </View>
+                )}
+
                 {record.remark && (
                   <View className={styles.remark}>备注：{record.remark}</View>
                 )}

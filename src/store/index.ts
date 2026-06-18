@@ -6,8 +6,13 @@ import type {
   BloodBatch,
   OutboundRecord,
   SelfpayApply,
-  DashboardStats
+  DashboardStats,
+  Donor,
+  InventoryLog,
+  InventoryLogType,
+  BloodType
 } from '@/types';
+import dayjs from 'dayjs';
 
 interface AppState {
   quotaList: QuotaInfo[];
@@ -16,6 +21,8 @@ interface AppState {
   bloodBatches: BloodBatch[];
   outboundRecords: OutboundRecord[];
   selfpayApplications: SelfpayApply[];
+  donors: Donor[];
+  inventoryLogs: InventoryLog[];
   currentOrgId: string;
 
   getDashboardStats: () => DashboardStats;
@@ -33,6 +40,12 @@ interface AppState {
   createSelfpayApply: (apply: SelfpayApply) => void;
   approveSelfpayApply: (applyId: string, approver: string) => void;
   setCurrentOrgId: (orgId: string) => void;
+  getDonorByIdCard: (idCard: string) => Donor | undefined;
+  upsertDonor: (donor: Partial<Donor> & { idCard: string; name: string; bloodType: BloodType; phone: string }) => Donor;
+  updateDonorAfterDonate: (idCard: string, donateDate: string) => void;
+  getInventoryLogsByBatchId: (batchId: string) => InventoryLog[];
+  addInventoryLog: (log: Omit<InventoryLog, 'id' | 'logTime'>) => void;
+  rejectSelfpayApply: (applyId: string, approver: string, rejectReason: string) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -42,6 +55,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   bloodBatches: [],
   outboundRecords: [],
   selfpayApplications: [],
+  donors: [],
+  inventoryLogs: [],
   currentOrgId: 'ORG001',
 
   getDashboardStats: () => {
@@ -108,34 +123,68 @@ export const useAppStore = create<AppState>((set, get) => ({
   addConsumption: (record) => {
     set((state) => {
       const quotaIndex = state.quotaList.findIndex(q => q.orgId === record.orgId);
-      if (quotaIndex < 0) return { consumptionRecords: [record, ...state.consumptionRecords] };
-      const quota = state.quotaList[quotaIndex];
-      const newQuota = { ...quota };
-      if (record.type === 'quota') {
-        newQuota.usedQuota = quota.usedQuota + record.amount;
-        newQuota.remainingQuota = Math.max(0, quota.remainingQuota - record.amount);
-      } else {
-        newQuota.selfpayCount = quota.selfpayCount + record.amount;
+      let newQuotaList = state.quotaList;
+      if (quotaIndex >= 0) {
+        const quota = state.quotaList[quotaIndex];
+        const newQuota = { ...quota };
+        if (record.type === 'quota') {
+          newQuota.usedQuota = quota.usedQuota + record.amount;
+          newQuota.remainingQuota = Math.max(0, quota.remainingQuota - record.amount);
+        } else {
+          newQuota.selfpayCount = quota.selfpayCount + record.amount;
+        }
+        newQuotaList = [...state.quotaList];
+        newQuotaList[quotaIndex] = newQuota;
       }
-      const newQuotaList = [...state.quotaList];
-      newQuotaList[quotaIndex] = newQuota;
+
+      let newDonors = state.donors;
+      if (record.idCard) {
+        const donorIndex = state.donors.findIndex(d => d.idCard === record.idCard);
+        if (donorIndex >= 0) {
+          const donor = { ...state.donors[donorIndex] };
+          donor.lastDonateDate = record.donateDate;
+          donor.donateCount = donor.donateCount + 1;
+          newDonors = [...state.donors];
+          newDonors[donorIndex] = donor;
+        }
+      }
+
       return {
         consumptionRecords: [record, ...state.consumptionRecords],
-        quotaList: newQuotaList
+        quotaList: newQuotaList,
+        donors: newDonors
       };
     });
   },
 
   addBloodBatch: (batch) => {
-    set((state) => ({
-      bloodBatches: [batch, ...state.bloodBatches]
-    }));
+    set((state) => {
+      const inboundLog: InventoryLog = {
+        id: `LOG_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        batchId: batch.id,
+        batchNo: batch.batchNo,
+        bloodType: batch.bloodType,
+        logType: 'inbound' as InventoryLogType,
+        changeQty: batch.quantity,
+        balanceQty: batch.quantity,
+        logTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        operator: '采血登记员',
+        relatedNo: `IN${dayjs(batch.collectionDate).format('YYYYMMDD')}${batch.id}`,
+        remark: '采血入库'
+      };
+      return {
+        bloodBatches: [batch, ...state.bloodBatches],
+        inventoryLogs: [inboundLog, ...state.inventoryLogs]
+      };
+    });
   },
 
   addOutbound: (record) => {
     set((state) => {
       const batchIndex = state.bloodBatches.findIndex(b => b.id === record.batchId);
-      if (batchIndex < 0) return { outboundRecords: [record, ...state.outboundRecords] };
+      if (batchIndex < 0) {
+        return { outboundRecords: [record, ...state.outboundRecords] };
+      }
       const batch = state.bloodBatches[batchIndex];
       const newBatch = {
         ...batch,
@@ -144,9 +193,46 @@ export const useAppStore = create<AppState>((set, get) => ({
       };
       const newBatches = [...state.bloodBatches];
       newBatches[batchIndex] = newBatch;
+
+      const outboundLog: InventoryLog = {
+        id: `LOG_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        batchId: record.batchId,
+        batchNo: record.batchNo,
+        bloodType: record.bloodType,
+        logType: 'outbound' as InventoryLogType,
+        changeQty: record.quantity,
+        balanceQty: newBatch.remainingQuantity,
+        logTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        operator: record.operator,
+        relatedNo: record.outboundNo,
+        receiver: record.receiver,
+        receiverDept: record.receiverDept,
+        receiverPhone: record.receiverPhone,
+        purpose: record.purpose
+      };
+
+      let newLogs = [outboundLog, ...state.inventoryLogs];
+
+      if (newBatch.remainingQuantity === 0) {
+        const exhaustedLog: InventoryLog = {
+          id: `LOG_${Date.now() + 1}_${Math.random().toString(36).substring(2, 6)}`,
+          batchId: record.batchId,
+          batchNo: record.batchNo,
+          bloodType: record.bloodType,
+          logType: 'exhausted' as InventoryLogType,
+          changeQty: 0,
+          balanceQty: 0,
+          logTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+          operator: '系统自动',
+          remark: '该批次已全部出库完毕'
+        };
+        newLogs = [exhaustedLog, ...newLogs];
+      }
+
       return {
         outboundRecords: [record, ...state.outboundRecords],
-        bloodBatches: newBatches
+        bloodBatches: newBatches,
+        inventoryLogs: newLogs
       };
     });
   },
@@ -240,5 +326,88 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
   },
 
-  setCurrentOrgId: (orgId) => set({ currentOrgId: orgId })
+  setCurrentOrgId: (orgId) => set({ currentOrgId: orgId }),
+
+  getDonorByIdCard: (idCard) => {
+    return get().donors.find(d => d.idCard === idCard);
+  },
+
+  upsertDonor: (donor) => {
+    const state = get();
+    const existingIndex = state.donors.findIndex(d => d.idCard === donor.idCard);
+    if (existingIndex >= 0) {
+      const existing = state.donors[existingIndex];
+      const updated: Donor = {
+        ...existing,
+        name: donor.name,
+        bloodType: donor.bloodType,
+        phone: donor.phone,
+        ...(donor.lastDonateDate !== undefined ? { lastDonateDate: donor.lastDonateDate } : {}),
+        ...(donor.donateCount !== undefined ? { donateCount: donor.donateCount } : {})
+      };
+      const newDonors = [...state.donors];
+      newDonors[existingIndex] = updated;
+      set({ donors: newDonors });
+      return updated;
+    } else {
+      const newDonor: Donor = {
+        id: `D${Date.now()}`,
+        idCard: donor.idCard,
+        name: donor.name,
+        bloodType: donor.bloodType,
+        phone: donor.phone,
+        donateCount: 0,
+        lastDonateDate: undefined
+      };
+      set({ donors: [newDonor, ...state.donors] });
+      return newDonor;
+    }
+  },
+
+  updateDonorAfterDonate: (idCard, donateDate) => {
+    set((state) => {
+      const donorIndex = state.donors.findIndex(d => d.idCard === idCard);
+      if (donorIndex < 0) return state;
+      const donor = { ...state.donors[donorIndex] };
+      donor.lastDonateDate = donateDate;
+      donor.donateCount = donor.donateCount + 1;
+      const newDonors = [...state.donors];
+      newDonors[donorIndex] = donor;
+      return { donors: newDonors };
+    });
+  },
+
+  getInventoryLogsByBatchId: (batchId) => {
+    return get().inventoryLogs
+      .filter(l => l.batchId === batchId)
+      .sort((a, b) => dayjs(b.logTime).valueOf() - dayjs(a.logTime).valueOf());
+  },
+
+  addInventoryLog: (log) => {
+    set((state) => {
+      const newLog: InventoryLog = {
+        ...log,
+        id: `LOG_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        logTime: dayjs().format('YYYY-MM-DD HH:mm:ss')
+      };
+      return {
+        inventoryLogs: [newLog, ...state.inventoryLogs]
+      };
+    });
+  },
+
+  rejectSelfpayApply: (applyId, approver, rejectReason) => {
+    set((state) => {
+      const idx = state.selfpayApplications.findIndex(a => a.id === applyId);
+      if (idx < 0) return state;
+      const apply = { ...state.selfpayApplications[idx] };
+      apply.status = 'rejected';
+      apply.approver = approver;
+      apply.approvalDate = new Date().toISOString().split('T')[0];
+      apply.rejectReason = rejectReason;
+      const newList = [...state.selfpayApplications];
+      newList[idx] = apply;
+      return { selfpayApplications: newList };
+    });
+  }
 }));

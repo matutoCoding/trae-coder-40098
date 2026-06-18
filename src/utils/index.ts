@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import Taro from '@tarojs/taro';
 import type { BloodBatch, BatchStatus, BloodType } from '@/types';
 
 export const formatDate = (date: string | Date, format = 'YYYY-MM-DD'): string => {
@@ -112,4 +113,28 @@ export const getFifoSortedBatches = (batches: BloodBatch[], bloodType?: BloodTyp
 
 export const formatNumber = (num: number, decimals = 0): string => {
   return num.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
+
+export const chooseDate = async (initialDate?: string): Promise<string | null> => {
+  try {
+    const res = await (Taro as any).chooseDate({
+      begin: '1900-01-01',
+      end: dayjs().add(100, 'day').format('YYYY-MM-DD'),
+      current: initialDate || dayjs().format('YYYY-MM-DD')
+    });
+    if (res && (res as any).date) return (res as any).date;
+    if (res && typeof res === 'string') return res;
+  } catch (e) {
+  }
+  try {
+    if (typeof window !== 'undefined' && (window as any).prompt) {
+      const val = (window as any).prompt(
+        '请选择/输入日期（格式：YYYY-MM-DD）',
+        initialDate || dayjs().format('YYYY-MM-DD')
+      );
+      if (val && /^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
+    }
+  } catch (e) {
+  }
+  return null;
 };

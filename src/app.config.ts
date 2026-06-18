@@ -13,7 +13,8 @@ export default defineAppConfig({
     'pages/donor-detail/index',
     'pages/batch-detail/index',
     'pages/inventory-tracker/index',
-    'pages/inventory-alert/index'
+    'pages/inventory-alert/index',
+    'pages/donate-certificate/index'
   ],
   window: {
     backgroundTextStyle: 'light',

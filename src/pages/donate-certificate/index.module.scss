@@ -1,0 +1,243 @@
+@use '../../styles/theme.scss' as *;
+@use '../../styles/variables.scss' as *;
+
+.certPage {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding: $page-padding;
+  padding-bottom: 80rpx;
+}
+
+.certCard {
+  background: $color-bg-card;
+  border-radius: 24rpx;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+  border: 2rpx solid rgba($color-primary, 0.2);
+}
+
+.certHeader {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: $spacing-xl $spacing-lg;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+
+  .bloodDrop {
+    font-size: 64rpx;
+    line-height: 1;
+  }
+
+  .title {
+    color: $color-text-white;
+    font-size: $font-size-xxl;
+    font-weight: $font-weight-bold;
+    letter-spacing: 2rpx;
+  }
+}
+
+.certNo {
+  text-align: center;
+  padding: $spacing-xl $spacing-lg $spacing-md;
+
+  .no {
+    font-size: 56rpx;
+    font-weight: $font-weight-bold;
+    color: $color-primary;
+    letter-spacing: 4rpx;
+    font-family: 'Courier New', monospace;
+  }
+
+  .label {
+    display: block;
+    margin-top: $spacing-sm;
+    font-size: $font-size-sm;
+    color: $color-text-tertiary;
+  }
+}
+
+.divider {
+  border: none;
+  border-top: 2rpx dashed $color-primary;
+  margin: 0 $spacing-lg;
+  opacity: 0.4;
+}
+
+.infoSection {
+  padding: $spacing-lg $spacing-lg $spacing-md;
+
+  .sectionTitle {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-md;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md $spacing-lg;
+  padding: 0 $spacing-lg $spacing-lg;
+
+  .infoItem {
+    .label {
+      font-size: $font-size-sm;
+      color: $color-text-tertiary;
+      display: block;
+      margin-bottom: 4rpx;
+    }
+
+    .value {
+      font-size: $font-size-md;
+      color: $color-text-primary;
+      font-weight: $font-weight-medium;
+    }
+  }
+}
+
+.bloodTypeBadge {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+
+  &.typeA { background: $color-blood-a; }
+  &.typeB { background: $color-blood-b; }
+  &.typeAB { background: $color-blood-ab; }
+  &.typeO { background: $color-blood-o; }
+}
+
+.intervalBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 20rpx;
+  border-radius: $radius-round;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &.valid {
+    background: rgba($color-success, 0.12);
+    color: $color-success;
+  }
+
+  &.invalid {
+    background: rgba($color-error, 0.12);
+    color: $color-error;
+  }
+}
+
+.quotaBadge {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &.quota {
+    background: rgba($color-secondary, 0.12);
+    color: $color-secondary;
+  }
+
+  &.selfpay {
+    background: rgba($color-warning, 0.12);
+    color: $color-warning;
+  }
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &.approved {
+    background: rgba($color-success, 0.12);
+    color: $color-success;
+  }
+
+  &.pending {
+    background: rgba($color-warning, 0.12);
+    color: $color-warning;
+  }
+
+  &.rejected {
+    background: rgba($color-error, 0.12);
+    color: $color-error;
+  }
+}
+
+.qrPlaceholder {
+  width: 200rpx;
+  height: 200rpx;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  margin: $spacing-lg auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+
+  .qrIcon {
+    font-size: 64rpx;
+  }
+
+  .qrText {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+  }
+}
+
+.qrTip {
+  text-align: center;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-lg;
+}
+
+.complianceText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-top: $spacing-sm;
+  line-height: $line-height-normal;
+}
+
+.footerText {
+  text-align: center;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  padding: $spacing-lg;
+  line-height: $line-height-loose;
+}
+
+.emptyState {
+  padding: 120rpx $spacing-lg;
+  text-align: center;
+
+  .emptyIcon {
+    font-size: 120rpx;
+    display: block;
+    margin-bottom: $spacing-md;
+  }
+
+  .emptyTitle {
+    font-size: $font-size-lg;
+    color: $color-text-primary;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $spacing-sm;
+  }
+
+  .emptyDesc {
+    font-size: $font-size-sm;
+    color: $color-text-tertiary;
+    line-height: $line-height-loose;
+  }
+}

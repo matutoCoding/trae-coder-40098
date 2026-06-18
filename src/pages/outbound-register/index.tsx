@@ -7,7 +7,9 @@ import {
   generateOrderNo,
   getBloodTypeColor,
   validatePhone,
-  getFifoSortedBatches
+  getFifoSortedBatches,
+  EXHAUSTED_BADGE_TEXT,
+  isBatchExhausted
 } from '@/utils';
 import classnames from 'classnames';
 import type { BloodBatch, BloodType, OutboundRecord } from '@/types';
@@ -42,10 +44,20 @@ const OutboundRegisterPage: React.FC = () => {
 
   const firstBatchId = fifoList[0]?.id || '';
 
+  const { isBatchUsable } = useAppStore();
+
   const toggleBatch = (b: BloodBatch) => {
-    if (b.status === 'expired' || b.status === 'locked' || b.remainingQuantity <= 0) {
+    if (!isBatchUsable(b)) {
+      let toastMsg = '该批次不可出库';
+      if (isBatchExhausted(b)) {
+        toastMsg = '该批次已清空，无库存可出库';
+      } else if (b.status === 'expired') {
+        toastMsg = '批次已过期，不可出库';
+      } else if (b.status === 'locked') {
+        toastMsg = '批次已锁定，不可出库';
+      }
       Taro.showToast({
-        title: b.status === 'expired' ? '批次已过期，不可出库' : b.status === 'locked' ? '批次已锁定，不可出库' : '库存不足',
+        title: toastMsg,
         icon: 'none'
       });
       return;
@@ -114,8 +126,15 @@ const OutboundRegisterPage: React.FC = () => {
       if (q > b.remainingQuantity) {
         return { ok: false, msg: `批次 ${b.batchNo} 数量超过库存（剩余${b.remainingQuantity}份）` };
       }
-      if (b.status === 'expired') return { ok: false, msg: `批次 ${b.batchNo} 已过期，不可出库` };
-      if (b.status === 'locked') return { ok: false, msg: `批次 ${b.batchNo} 已锁定，不可出库` };
+      if (!isBatchUsable(b)) {
+        if (isBatchExhausted(b)) {
+          return { ok: false, msg: `批次 ${b.batchNo} 已清空，无库存可出库` };
+        } else if (b.status === 'expired') {
+          return { ok: false, msg: `批次 ${b.batchNo} 已过期，不可出库` };
+        } else if (b.status === 'locked') {
+          return { ok: false, msg: `批次 ${b.batchNo} 已锁定，不可出库` };
+        }
+      }
     }
     if (!receiver.trim()) return { ok: false, msg: '请输入领用人姓名' };
     if (!receiverDept.trim()) return { ok: false, msg: '请输入领用科室' };
@@ -231,7 +250,8 @@ const OutboundRegisterPage: React.FC = () => {
         ) : (
           <View className={styles.batchList}>
             {fifoList.map((b, idx) => {
-              const disabled = b.status === 'expired' || b.status === 'locked' || b.remainingQuantity <= 0;
+              const isExhausted = isBatchExhausted(b);
+              const disabled = !isBatchUsable(b);
               const selected = selectedBatches.has(b.id);
               const q = quantities[b.id] || 1;
               return (
@@ -245,13 +265,13 @@ const OutboundRegisterPage: React.FC = () => {
                   )}
                   onClick={() => toggleBatch(b)}
                 >
-                  {idx === 0 && <View className={styles.badgeFifo}>⭐ FIFO最优先</View>}
+                  {idx === 0 && !disabled && <View className={styles.badgeFifo}>⭐ FIFO最优先</View>}
                   <View className={styles.batchRow}>
                     <Text className={styles.no}>{b.batchNo}</Text>
                     <View
-                      className={classnames(styles.badge, statusToBadgeCss(b.status) as any)}
+                      className={classnames(styles.badge, isExhausted ? styles.exhausted : statusToBadgeCss(b.status) as any)}
                     >
-                      {statusText(b.status)}
+                      {isExhausted ? '📦 无库存' : statusText(b.status)}
                     </View>
                   </View>
                   <View className={styles.batchMeta}>
@@ -293,7 +313,7 @@ const OutboundRegisterPage: React.FC = () => {
                     )}
                     {disabled && (
                       <Text style={{ fontSize: '22rpx', color: '#86909C' }}>
-                        {b.status === 'expired' ? '已过期' : b.status === 'locked' ? '已锁定' : '库存为0'}
+                        {isExhausted ? '📦 无库存' : b.status === 'expired' ? '已过期' : '已锁定'}
                       </Text>
                     )}
                   </View>

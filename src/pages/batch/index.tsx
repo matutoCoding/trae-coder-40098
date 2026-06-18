@@ -25,7 +25,7 @@ const BatchPage: React.FC = () => {
     [bloodBatches]
   );
   const lockedCount = useMemo(
-    () => bloodBatches.filter(b => b.status === 'locked').length,
+    () => bloodBatches.filter(b => b.status === 'locked' || b.remainingQuantity === 0).length,
     [bloodBatches]
   );
 
@@ -48,7 +48,11 @@ const BatchPage: React.FC = () => {
       list = list.filter(b => b.bloodType === typeFilter);
     }
     if (statusFilter !== 'all') {
-      list = list.filter(b => b.status === statusFilter);
+      if (statusFilter === 'locked') {
+        list = list.filter(b => b.status === 'locked' || b.remainingQuantity === 0);
+      } else {
+        list = list.filter(b => b.status === statusFilter);
+      }
     }
     return list.sort((a, b) => a.daysToExpiry - b.daysToExpiry);
   }, [bloodBatches, typeFilter, statusFilter]);
@@ -58,7 +62,7 @@ const BatchPage: React.FC = () => {
     { key: 'normal', label: '正常' },
     { key: 'near_expiry', label: `临期(${expiring.length})` },
     { key: 'expired', label: `过期(${expired.length})` },
-    { key: 'locked', label: '锁定' }
+    { key: 'locked', label: `锁定(${lockedCount})` }
   ];
 
   const bloodTypes: { key: BloodType | 'all'; label: string }[] = [

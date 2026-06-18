@@ -36,16 +36,22 @@ export const getDaysToExpiry = (expiryDate: string): number => {
 
 export const getBatchStatus = (batch: Omit<BloodBatch, 'status' | 'daysToExpiry'> & { daysToExpiry?: number }): { status: BatchStatus; daysToExpiry: number } => {
   const days = batch.daysToExpiry ?? getDaysToExpiry(batch.expiryDate);
+  if (batch.remainingQuantity <= 0) {
+    return { status: 'locked', daysToExpiry: days };
+  }
   if (days < 0) {
     return { status: 'expired', daysToExpiry: days };
   }
   if (days <= 30) {
     return { status: 'near_expiry', daysToExpiry: days };
   }
-  if (batch.remainingQuantity <= 0) {
-    return { status: 'locked', daysToExpiry: days };
-  }
   return { status: 'normal', daysToExpiry: days };
+};
+
+export const EXHAUSTED_BADGE_TEXT = '📦 已清空（无库存锁定）';
+
+export const isBatchExhausted = (batch: { remainingQuantity: number }): boolean => {
+  return batch.remainingQuantity === 0;
 };
 
 export const getStatusText = (status: BatchStatus): string => {

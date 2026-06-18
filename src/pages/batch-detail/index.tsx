@@ -10,7 +10,9 @@ import {
   getBloodTypeText,
   getStatusText,
   formatDate,
-  formatDateTime
+  formatDateTime,
+  EXHAUSTED_BADGE_TEXT,
+  isBatchExhausted
 } from '@/utils';
 import dayjs from 'dayjs';
 import type { InventoryLog, InventoryLogType } from '@/types';
@@ -22,7 +24,7 @@ const logTypeConfig: Record<InventoryLogType, { icon: string; label: string }> =
   expired_lock: { icon: '🔒', label: '过期锁定' },
   manual_lock: { icon: '🔒', label: '锁定' },
   manual_unlock: { icon: '🔓', label: '解锁' },
-  adjust: { icon: '⚙️', label: '调整' }
+  adjust: { icon: '⚠️', label: '库存调整' }
 };
 
 const getChangeQtyText = (log: InventoryLog): string => {
@@ -70,6 +72,13 @@ const BatchDetailPage: React.FC = () => {
     if (logs.length === 0) return '';
     const sorted = [...logs].sort((a, b) => dayjs(b.logTime).valueOf() - dayjs(a.logTime).valueOf());
     return sorted[0].logTime;
+  }, [logs]);
+
+  const latestAdjustLog = useMemo(() => {
+    const adjustLogs = logs.filter(l => l.logType === 'adjust');
+    if (adjustLogs.length === 0) return null;
+    const sorted = [...adjustLogs].sort((a, b) => dayjs(b.logTime).valueOf() - dayjs(a.logTime).valueOf());
+    return sorted[0];
   }, [logs]);
 
   const renderLogExtra = (log: InventoryLog) => {
@@ -124,6 +133,23 @@ const BatchDetailPage: React.FC = () => {
       );
     }
 
+    if (log.logType === 'adjust') {
+      return (
+        <View className={styles.logExtra}>
+          <View className={styles.extraItem}>
+            <Text className={styles.label}>处理人：</Text>
+            <Text>{log.operator}</Text>
+          </View>
+          {log.remark && (
+            <View className={styles.extraItem}>
+              <Text className={styles.label}>处理说明：</Text>
+              <Text>{log.remark}</Text>
+            </View>
+          )}
+        </View>
+      );
+    }
+
     return null;
   };
 
@@ -136,9 +162,11 @@ const BatchDetailPage: React.FC = () => {
   }
 
   const bloodTypeColor = getBloodTypeColor(batch.bloodType);
-  const statusBadgeClass = classnames(styles.statusBadge, styles[batch.status]);
+  const isExhausted = isBatchExhausted(batch);
+  const statusBadgeClass = classnames(styles.statusBadge, isExhausted ? styles.exhausted : styles[batch.status]);
 
   const daysText = (() => {
+    if (isExhausted) return '';
     if (batch.status === 'expired') return `已过期${Math.abs(batch.daysToExpiry)}天`;
     if (batch.status === 'locked') return '';
     if (batch.daysToExpiry === 0) return '今日到期';
@@ -159,12 +187,31 @@ const BatchDetailPage: React.FC = () => {
             {getBloodTypeText(batch.bloodType)}
           </View>
           <View className={statusBadgeClass}>
-            {getStatusText(batch.status)}
+            {isExhausted ? EXHAUSTED_BADGE_TEXT : getStatusText(batch.status)}
             {daysText && (
               <Text className={styles.daysLabel}>{daysText}</Text>
             )}
           </View>
         </View>
+        {(batch.status === 'locked' || isExhausted) && latestAdjustLog && (
+          <View className={styles.processInfo}>
+            <Text className={styles.processTitle}>🔒 已处理</Text>
+            <View className={styles.processRow}>
+              <Text className={styles.processLabel}>处理时间：</Text>
+              <Text className={styles.processValue}>{formatDateTime(latestAdjustLog.logTime)}</Text>
+            </View>
+            <View className={styles.processRow}>
+              <Text className={styles.processLabel}>处理人：</Text>
+              <Text className={styles.processValue}>{latestAdjustLog.operator}</Text>
+            </View>
+            {latestAdjustLog.remark && (
+              <View className={styles.processRow}>
+                <Text className={styles.processLabel}>处理说明：</Text>
+                <Text className={styles.processValue}>{latestAdjustLog.remark}</Text>
+              </View>
+            )}
+          </View>
+        )}
       </View>
 
       <View className={styles.statsGrid}>
@@ -186,10 +233,10 @@ const BatchDetailPage: React.FC = () => {
           <Text
             className={classnames(
               styles.value,
-              batch.remainingQuantity === 0 ? styles.danger : styles.success
+              isExhausted ? styles.exhausted : styles.success
             )}
           >
-            {batch.remainingQuantity === 0 ? (
+            {isExhausted ? (
               '已清空'
             ) : (
               <>
@@ -198,7 +245,10 @@ const BatchDetailPage: React.FC = () => {
               </>
             )}
           </Text>
-          <Text className={styles.label}>剩余份数</Text>
+          <Text className={styles.label}>
+            剩余份数
+            {isExhausted && <Text className={styles.exhaustedHint}>（已锁定，不可出库）</Text>}
+          </Text>
         </View>
         <View className={styles.statItem}>
           <Text className={classnames(styles.value, styles.primary)}>

@@ -72,6 +72,7 @@ export interface ConsumptionRecord {
   remark?: string;
   selfpayApplyNo?: string;
   selfpayStatus?: ApplyStatus;
+  donationNo: string;
 }
 
 export interface BloodBatch {
@@ -138,6 +139,7 @@ export interface DashboardStats {
   totalBatches: number;
   nearExpiryCount: number;
   expiredCount: number;
+  lockedCount: number;
   exhaustedCount?: number;
   totalOutbound: number;
   monthlyDonations: number;

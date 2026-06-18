@@ -96,12 +96,81 @@
       background: rgba(134, 144, 156, 0.95);
       color: $color-text-white;
     }
+
+    &.exhausted {
+      background: rgba(134, 144, 156, 0.95);
+      color: $color-text-white;
+    }
   }
 
   .daysLabel {
     font-size: $font-size-xs;
     opacity: 0.9;
     margin-left: 4rpx;
+  }
+
+  .processInfo {
+    margin-top: $spacing-md;
+    padding: $spacing-md;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: $radius-md;
+    position: relative;
+    z-index: 1;
+
+    .processTitle {
+      font-size: $font-size-md;
+      font-weight: $font-weight-bold;
+      margin-bottom: $spacing-sm;
+      display: block;
+    }
+
+    .processRow {
+      display: flex;
+      align-items: flex-start;
+      gap: $spacing-xs;
+      margin-bottom: $spacing-xs;
+      font-size: $font-size-sm;
+      line-height: 1.5;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .processLabel {
+        flex-shrink: 0;
+        opacity: 0.85;
+      }
+
+      .processValue {
+        flex: 1;
+        word-break: break-all;
+      }
+    }
+  }
+}
+
+.expiredProcessWarn {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, rgba(245, 63, 63, 0.1) 0%, rgba(198, 40, 40, 0.08) 100%);
+  border: 2rpx solid rgba(245, 63, 63, 0.4);
+  border-radius: $radius-md;
+  margin-bottom: $spacing-lg;
+
+  .warnIcon {
+    font-size: 32rpx;
+    flex-shrink: 0;
+    margin-top: 2rpx;
+  }
+
+  .warnText {
+    flex: 1;
+    font-size: $font-size-sm;
+    color: $color-error;
+    font-weight: $font-weight-medium;
+    line-height: 1.6;
   }
 }
 
@@ -139,6 +208,10 @@
       &.warning {
         color: $color-warning;
       }
+
+      &.exhausted {
+        color: $color-text-tertiary;
+      }
     }
 
     .unit {
@@ -152,6 +225,13 @@
       font-size: $font-size-sm;
       color: $color-text-secondary;
       margin-top: $spacing-xs;
+    }
+
+    .exhaustedHint {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+      margin-left: $spacing-xs;
+      font-weight: $font-weight-normal;
     }
   }
 }
@@ -279,12 +359,26 @@
       background: $color-text-tertiary;
       box-shadow: 0 0 0 4rpx rgba(134, 144, 156, 0.15);
     }
+
+    &.adjustExpired {
+      border-color: #C62828 !important;
+      background: #C62828 !important;
+      box-shadow: 0 0 0 4rpx rgba(198, 40, 40, 0.25) !important;
+    }
   }
 
   .logCard {
     background: $color-bg-page;
     border-radius: $radius-sm;
     padding: $spacing-md;
+    transition: all $transition-base;
+
+    &.logCardAdjustExpired {
+      background: linear-gradient(135deg, #C62828 0%, #B71C1C 100%);
+      color: #fff;
+      border: 2rpx solid #8B0000;
+      box-shadow: 0 4rpx 16rpx rgba(198, 40, 40, 0.3);
+    }
 
     .logHeader {
       display: flex;
@@ -324,6 +418,11 @@
         background: rgba(134, 144, 156, 0.12);
         color: $color-text-tertiary;
       }
+
+      &.logTypeTagAdjustExpired {
+        background: rgba(255, 255, 255, 0.25) !important;
+        color: #fff !important;
+      }
     }
 
     .logQty {
@@ -351,17 +450,31 @@
       &.adjust {
         color: $color-text-secondary;
       }
+
+      &.logQtyAdjustExpired {
+        color: #fff !important;
+      }
     }
 
     .logBalance {
       font-size: $font-size-xs;
       color: $color-text-secondary;
       margin-bottom: $spacing-xs;
+      transition: all $transition-base;
+
+      &.logBalanceAdjustExpired {
+        color: rgba(255, 255, 255, 0.9) !important;
+      }
     }
 
     .logTime {
       font-size: $font-size-xs;
       color: $color-text-tertiary;
+      transition: all $transition-base;
+
+      &.logTimeAdjustExpired {
+        color: rgba(255, 255, 255, 0.8) !important;
+      }
     }
 
     .logExtra {
@@ -371,6 +484,7 @@
       font-size: $font-size-xs;
       color: $color-text-secondary;
       line-height: 1.6;
+      transition: all $transition-base;
 
       .extraItem {
         margin-bottom: 4rpx;
@@ -382,6 +496,15 @@
 
       .label {
         color: $color-text-tertiary;
+      }
+    }
+
+    .logCardAdjustExpired .logExtra {
+      border-top-color: rgba(255, 255, 255, 0.3) !important;
+      color: rgba(255, 255, 255, 0.95) !important;
+
+      .label {
+        color: rgba(255, 255, 255, 0.8) !important;
       }
     }
   }

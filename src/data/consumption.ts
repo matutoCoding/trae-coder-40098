@@ -15,6 +15,7 @@ export const mockConsumptionRecords: ConsumptionRecord[] = [
     amount: 1,
     donateDate: today.subtract(1, 'day').format('YYYY-MM-DD'),
     batchNo: 'BT20250610A001',
+    donationNo: 'DON202606180001',
     intervalCheckPassed: true,
     daysSinceLastDonate: 195,
     operator: '李护士',
@@ -31,6 +32,7 @@ export const mockConsumptionRecords: ConsumptionRecord[] = [
     amount: 1,
     donateDate: today.subtract(2, 'day').format('YYYY-MM-DD'),
     batchNo: 'BT20250609O002',
+    donationNo: 'DON202606170002',
     intervalCheckPassed: true,
     daysSinceLastDonate: 210,
     operator: '李护士'
@@ -46,6 +48,7 @@ export const mockConsumptionRecords: ConsumptionRecord[] = [
     amount: 1,
     donateDate: today.subtract(3, 'day').format('YYYY-MM-DD'),
     batchNo: 'BT20250608B003',
+    donationNo: 'DON202606160003',
     intervalCheckPassed: true,
     operator: '李护士',
     remark: '超额自费'
@@ -61,6 +64,7 @@ export const mockConsumptionRecords: ConsumptionRecord[] = [
     amount: 1,
     donateDate: today.subtract(5, 'day').format('YYYY-MM-DD'),
     batchNo: 'BT20250606AB004',
+    donationNo: 'DON202606140004',
     intervalCheckPassed: true,
     operator: '王医生'
   },
@@ -75,6 +79,7 @@ export const mockConsumptionRecords: ConsumptionRecord[] = [
     amount: 1,
     donateDate: today.subtract(7, 'day').format('YYYY-MM-DD'),
     batchNo: 'BT20250604A005',
+    donationNo: 'DON202606120005',
     intervalCheckPassed: true,
     daysSinceLastDonate: 200,
     operator: '李护士'
@@ -90,6 +95,7 @@ export const mockConsumptionRecords: ConsumptionRecord[] = [
     amount: 1,
     donateDate: today.subtract(4, 'day').format('YYYY-MM-DD'),
     batchNo: 'BT20250607O006',
+    donationNo: 'DON202606150006',
     intervalCheckPassed: true,
     operator: '张护士'
   },
@@ -104,6 +110,7 @@ export const mockConsumptionRecords: ConsumptionRecord[] = [
     amount: 1,
     donateDate: today.subtract(10, 'day').format('YYYY-MM-DD'),
     batchNo: 'BT20250601B007',
+    donationNo: 'DON202606090007',
     intervalCheckPassed: false,
     daysSinceLastDonate: 90,
     operator: '李护士',
@@ -120,6 +127,7 @@ export const mockConsumptionRecords: ConsumptionRecord[] = [
     amount: 1,
     donateDate: today.subtract(6, 'day').format('YYYY-MM-DD'),
     batchNo: 'BT20250605A008',
+    donationNo: 'DON202606130008',
     intervalCheckPassed: true,
     operator: '赵护士'
   }

@@ -98,6 +98,16 @@
       border-color: $color-error;
       box-shadow: 0 4rpx 16rpx rgba(245, 63, 63, 0.25);
     }
+
+    .exhaustedBadge {
+      margin-left: $spacing-xs;
+      padding: 2rpx 12rpx;
+      border-radius: $radius-round;
+      background: rgba(255, 255, 255, 0.3);
+      font-size: $font-size-xs;
+      font-weight: $font-weight-semibold;
+      color: inherit;
+    }
   }
 }
 
@@ -158,10 +168,16 @@
   padding: $spacing-md $spacing-md $spacing-md 72rpx;
   box-shadow: $shadow-card;
   transition: all $transition-base;
+  border: 2rpx solid transparent;
 
   &:active {
     transform: scale(0.98);
     box-shadow: $shadow-card-hover;
+  }
+
+  &.expiredProcessHighlight {
+    border-color: #C62828;
+    box-shadow: 0 4rpx 16rpx rgba(198, 40, 40, 0.2);
   }
 }
 
@@ -195,10 +211,14 @@
     box-shadow: 0 0 0 6rpx rgba(245, 63, 63, 0.15);
   }
 
-  &.manual_unlock,
-  &.adjust {
+  &.manual_unlock {
     background: $color-text-tertiary;
     box-shadow: 0 0 0 6rpx rgba(134, 144, 156, 0.15);
+  }
+
+  &.adjust {
+    background: #C62828;
+    box-shadow: 0 0 0 6rpx rgba(198, 40, 40, 0.15);
   }
 }
 
@@ -238,10 +258,14 @@
       color: $color-error;
     }
 
-    &.manual_unlock,
-    &.adjust {
+    &.manual_unlock {
       background: rgba(134, 144, 156, 0.12);
       color: $color-text-tertiary;
+    }
+
+    &.adjust {
+      background: rgba(198, 40, 40, 0.12);
+      color: #C62828;
     }
   }
 
@@ -278,7 +302,7 @@
     }
 
     &.adjust {
-      color: $color-text-secondary;
+      color: #C62828;
     }
   }
 
@@ -379,6 +403,10 @@
     }
 
     &.locked {
+      background: $color-text-tertiary;
+    }
+
+    &.exhausted {
       background: $color-text-tertiary;
     }
   }

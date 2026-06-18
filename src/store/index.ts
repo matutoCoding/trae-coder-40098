@@ -13,6 +13,9 @@ import type {
   BloodType
 } from '@/types';
 import dayjs from 'dayjs';
+import { isDonateIntervalValid } from '@/utils';
+
+const generateDonationNo = () => `DON${dayjs().format('YYYYMMDD')}${String(Math.floor(Math.random()*10000)).padStart(4,'0')}`;
 
 interface AppState {
   quotaList: QuotaInfo[];
@@ -36,7 +39,7 @@ interface AppState {
   getNearExpiryBatches: (days: number) => BloodBatch[];
   getExpiredWithStockBatches: () => BloodBatch[];
   getExhaustedBatches: () => BloodBatch[];
-  addConsumption: (record: ConsumptionRecord) => void;
+  addConsumption: (record: ConsumptionRecord) => ConsumptionRecord | null;
   addBloodBatch: (batch: BloodBatch) => void;
   addOutbound: (record: OutboundRecord) => void;
   distributeQuota: (record: QuotaDistributionRecord) => void;
@@ -50,6 +53,8 @@ interface AppState {
   getInventoryLogsByBatchId: (batchId: string) => InventoryLog[];
   addInventoryLog: (log: Omit<InventoryLog, 'id' | 'logTime'>) => void;
   rejectSelfpayApply: (applyId: string, approver: string, rejectReason: string) => void;
+  processExpiredBatch: (batchId: string, processor: string, remark: string) => void;
+  getConsumptionByDonationNo: (donationNo: string) => ConsumptionRecord | undefined;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -71,8 +76,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     const remainingQuota = quota?.remainingQuota ?? 0;
     const quotaUsageRate = totalQuota > 0 ? Math.round((usedQuota / totalQuota) * 100) : 0;
     const totalBatches = state.bloodBatches.length;
-    const nearExpiryCount = state.bloodBatches.filter(b => b.status === 'near_expiry').length;
-    const expiredCount = state.bloodBatches.filter(b => b.status === 'expired').length;
+    const nearExpiryCount = state.bloodBatches.filter(b => b.status === 'near_expiry' && b.remainingQuantity > 0).length;
+    const expiredCount = state.bloodBatches.filter(b => b.status === 'expired' && b.remainingQuantity > 0).length;
+    const lockedCount = state.bloodBatches.filter(b => b.status === 'locked' || b.remainingQuantity === 0).length;
     const exhaustedCount = state.bloodBatches.filter(b => b.remainingQuantity === 0).length;
     const totalOutbound = state.outboundRecords.length;
     const currentMonth = new Date().getMonth();
@@ -85,7 +91,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const pendingApprovals = state.outboundRecords.filter(o => o.status === 'pending').length;
     return {
       totalQuota, usedQuota, remainingQuota, quotaUsageRate,
-      totalBatches, nearExpiryCount, expiredCount, exhaustedCount,
+      totalBatches, nearExpiryCount, expiredCount, lockedCount, exhaustedCount,
       totalOutbound, monthlyDonations, selfpayApplications, pendingApprovals
     };
   },
@@ -100,6 +106,10 @@ export const useAppStore = create<AppState>((set, get) => ({
       .sort((a, b) => new Date(b.donateDate).getTime() - new Date(a.donateDate).getTime());
   },
 
+  getConsumptionByDonationNo: (donationNo) => {
+    return get().consumptionRecords.find(r => r.donationNo === donationNo);
+  },
+
   getBatchesByBloodType: (bloodType) => {
     const list = get().bloodBatches;
     if (!bloodType) return list;
@@ -107,11 +117,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   getExpiringBatches: () => {
-    return get().bloodBatches.filter(b => b.status === 'near_expiry');
+    return get().bloodBatches.filter(b => b.status === 'near_expiry' && b.remainingQuantity > 0);
   },
 
   getExpiredBatches: () => {
-    return get().bloodBatches.filter(b => b.status === 'expired');
+    return get().bloodBatches.filter(b => b.status === 'expired' && b.remainingQuantity > 0);
   },
 
   getFifoRecommendedBatches: () => {
@@ -145,7 +155,19 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   addConsumption: (record) => {
+    let newRecord: ConsumptionRecord | null = null;
     set((state) => {
+      const donationNo = generateDonationNo();
+
+      let prevLastDonateDate: string | undefined;
+      if (record.idCard) {
+        const existingDonor = state.donors.find(d => d.idCard === record.idCard);
+        prevLastDonateDate = existingDonor?.lastDonateDate;
+      }
+
+      const intervalResult = isDonateIntervalValid(prevLastDonateDate);
+      const intervalValid = intervalResult.valid;
+
       const quotaIndex = state.quotaList.findIndex(q => q.orgId === record.orgId);
       let newQuotaList = state.quotaList;
       if (quotaIndex >= 0) {
@@ -173,12 +195,18 @@ export const useAppStore = create<AppState>((set, get) => ({
         }
       }
 
+      newRecord = {
+        ...record,
+        donationNo: record.donationNo || donationNo
+      };
+
       return {
-        consumptionRecords: [record, ...state.consumptionRecords],
+        consumptionRecords: [newRecord, ...state.consumptionRecords],
         quotaList: newQuotaList,
         donors: newDonors
       };
     });
+    return newRecord;
   },
 
   addBloodBatch: (batch) => {
@@ -331,8 +359,18 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   createSelfpayApply: (apply) => {
+    const processedApply: SelfpayApply = {
+      ...apply,
+      applicant: apply.applicant || apply.donorName || '',
+      applicantPhone: apply.applicantPhone || apply.donorPhone || '',
+      donorName: apply.donorName || apply.applicant || '',
+      donorIdCard: apply.donorIdCard || undefined,
+      donorBloodType: apply.donorBloodType || undefined,
+      donorPhone: apply.donorPhone || apply.applicantPhone || undefined,
+      lastDonateDate: apply.lastDonateDate || undefined
+    };
     set((state) => ({
-      selfpayApplications: [apply, ...state.selfpayApplications]
+      selfpayApplications: [processedApply, ...state.selfpayApplications]
     }));
   },
 
@@ -445,5 +483,42 @@ export const useAppStore = create<AppState>((set, get) => ({
       });
       return { selfpayApplications: newList, consumptionRecords: newConsumptionRecords };
     });
+  },
+
+  processExpiredBatch: (batchId, processor, remark) => {
+    set((state) => {
+      const batchIndex = state.bloodBatches.findIndex(b => b.id === batchId);
+      if (batchIndex < 0) return state;
+      const batch = state.bloodBatches[batchIndex];
+      const newBatch = {
+        ...batch,
+        status: 'locked' as const
+      };
+      const newBatches = [...state.bloodBatches];
+      newBatches[batchIndex] = newBatch;
+
+      const expiredLog: InventoryLog = {
+        id: `LOG_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        batchId: batch.id,
+        batchNo: batch.batchNo,
+        bloodType: batch.bloodType,
+        logType: 'adjust' as InventoryLogType,
+        changeQty: 0,
+        balanceQty: batch.remainingQuantity,
+        logTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        operator: processor,
+        remark: `过期处理：${remark}`,
+        relatedNo: `PROC${dayjs().format('YYYYMMDD')}`
+      };
+
+      return {
+        bloodBatches: newBatches,
+        inventoryLogs: [expiredLog, ...state.inventoryLogs]
+      };
+    });
+  },
+
+  getConsumptionByDonationNo: (donationNo) => {
+    return get().consumptionRecords.find(r => r.donationNo === donationNo);
   }
 }));

@@ -66,28 +66,41 @@ const DonateRegisterPage: React.FC = () => {
       const apply = selfpayApplications.find(a => a.id === selfpayApplyId);
       if (apply && apply.status === 'approved') {
         Taro.showToast({ title: '自费申请已通过，可继续完成献血登记', icon: 'success' });
+
+        const nameVal = apply.donorName || apply.applicant || '';
+        const phoneVal = apply.donorPhone || apply.applicantPhone || '';
+        const idCardVal = apply.donorIdCard || '';
+        const bloodTypeVal = apply.donorBloodType || '';
+        const lastDonateDateVal = apply.lastDonateDate || '';
+
+        setName(nameVal);
+        setPhone(phoneVal);
+        setIdCard(idCardVal);
+        setBloodType(bloodTypeVal as BloodType | '');
+        setLastDonateDate(lastDonateDateVal);
         if (apply.orgId) setOrgId(apply.orgId);
-        if (apply.donorName) setName(apply.donorName);
-        if (apply.donorIdCard) setIdCard(apply.donorIdCard);
-        if (apply.donorBloodType) setBloodType(apply.donorBloodType);
-        const phoneVal = apply.donorPhone || apply.applicantPhone;
-        if (phoneVal) setPhone(phoneVal);
-        if (apply.lastDonateDate) setLastDonateDate(apply.lastDonateDate);
+
+        const donorFromStore = donors.find(d =>
+          (apply.donorIdCard && d.idCard === apply.donorIdCard) ||
+          (nameVal && d.name === nameVal) ||
+          (phoneVal && d.phone === phoneVal)
+        );
+        if (donorFromStore) {
+          setDonorId(donorFromStore.id);
+          if (!nameVal && donorFromStore.name) setName(donorFromStore.name);
+          if (!phoneVal && donorFromStore.phone) setPhone(donorFromStore.phone);
+          if (!idCardVal && donorFromStore.idCard) setIdCard(donorFromStore.idCard);
+          if (!bloodTypeVal && donorFromStore.bloodType) setBloodType(donorFromStore.bloodType);
+          if (!lastDonateDateVal && donorFromStore.lastDonateDate) setLastDonateDate(donorFromStore.lastDonateDate);
+        }
+
         setMode('selfpayApply');
         setSelfpayApplyNo(apply.applyNo);
         setSelfpayStatus('approved');
 
-        if (apply.donorIdCard) {
-          const donorFromStore = donors.find(d => d.idCard === apply.donorIdCard);
-          if (donorFromStore) {
-            setDonorId(donorFromStore.id);
-            if (donorFromStore.name) setName(donorFromStore.name);
-            if (donorFromStore.phone) setPhone(donorFromStore.phone);
-            if (donorFromStore.bloodType) setBloodType(donorFromStore.bloodType);
-            if (donorFromStore.lastDonateDate) setLastDonateDate(donorFromStore.lastDonateDate);
-          }
+        if (nameVal && apply.orgId) {
+          setSubmitDisabled(false);
         }
-        setSubmitDisabled(false);
       }
     }
   }, []);
@@ -132,6 +145,7 @@ const DonateRegisterPage: React.FC = () => {
     if (!bloodType) return { ok: false, msg: '请选择血型' };
     if (!phone.trim()) return { ok: false, msg: '请输入手机号' };
     if (!validatePhone(phone)) return { ok: false, msg: '手机号格式不正确' };
+    if (!lastDonateDate) return { ok: false, msg: '请选择上次献血日期' };
     if (!orgId) return { ok: false, msg: '请选择所属单位' };
     return { ok: true };
   };
@@ -152,11 +166,60 @@ const DonateRegisterPage: React.FC = () => {
 
   const doSubmit = (submitMode: SubmitMode) => {
     setForceShowIntervalError(true);
-    const req = checkRequired();
-    if (!req.ok) {
-      Taro.showToast({ title: req.msg!, icon: 'none' });
+
+    const isSelfpayApprovedBackflow = mode === 'selfpayApply' && selfpayStatus === 'approved';
+
+    if (!name.trim()) {
+      Taro.showToast({ title: '请输入姓名', icon: 'none' });
       return;
     }
+    if (!orgId) {
+      Taro.showToast({ title: '请选择所属单位', icon: 'none' });
+      return;
+    }
+
+    if (isSelfpayApprovedBackflow) {
+      let donorFromStore = donors.find(d => d.name === name.trim());
+      if (donorFromStore) {
+        if (!idCard.trim() && donorFromStore.idCard) setIdCard(donorFromStore.idCard);
+        if (!bloodType && donorFromStore.bloodType) setBloodType(donorFromStore.bloodType);
+        if (!phone.trim() && donorFromStore.phone) setPhone(donorFromStore.phone);
+        if (!lastDonateDate && donorFromStore.lastDonateDate) setLastDonateDate(donorFromStore.lastDonateDate);
+        if (!donorId) setDonorId(donorFromStore.id);
+      }
+
+      if (!idCard.trim()) {
+        Taro.showToast({ title: '请补全身份证号信息', icon: 'none' });
+        return;
+      }
+      if (!validateIdCard(idCard)) {
+        Taro.showToast({ title: '证件号格式不正确', icon: 'none' });
+        return;
+      }
+      if (!bloodType) {
+        Taro.showToast({ title: '请补全血型信息', icon: 'none' });
+        return;
+      }
+      if (!phone.trim()) {
+        Taro.showToast({ title: '请补全手机号信息', icon: 'none' });
+        return;
+      }
+      if (!validatePhone(phone)) {
+        Taro.showToast({ title: '手机号格式不正确', icon: 'none' });
+        return;
+      }
+      if (!lastDonateDate) {
+        Taro.showToast({ title: '请补全上次献血日期', icon: 'none' });
+        return;
+      }
+    } else {
+      const req = checkRequired();
+      if (!req.ok) {
+        Taro.showToast({ title: req.msg!, icon: 'none' });
+        return;
+      }
+    }
+
     if (!intervalCheck.valid) {
       const need = 180 - intervalCheck.days;
       Taro.showModal({
@@ -211,9 +274,28 @@ const DonateRegisterPage: React.FC = () => {
         lastDonateDate: lastDonateDate || undefined,
         remark: ''
       };
-      addConsumption(record);
-      Taro.showToast({ title: '登记成功，已扣减额度', icon: 'success' });
-      setTimeout(() => Taro.navigateBack(), 800);
+      const newRecord = addConsumption(record);
+      if (newRecord) {
+        Taro.showModal({
+          title: '✓ 献血登记成功！',
+          content: `献血凭证号：${newRecord.donationNo}`,
+          confirmText: '去查看献血凭证',
+          cancelText: '好的',
+          confirmColor: '#E53935',
+          success: (res) => {
+            if (res.confirm) {
+              Taro.navigateTo({
+                url: `/pages/donate-certificate/index?donationNo=${encodeURIComponent(newRecord.donationNo)}`
+              });
+            } else {
+              Taro.navigateBack();
+            }
+          }
+        });
+      } else {
+        Taro.showToast({ title: '登记成功，已扣减额度', icon: 'success' });
+        setTimeout(() => Taro.navigateBack(), 800);
+      }
     } else {
       if (isSelfpayApprovedFlow) {
         const approvedRecord: ConsumptionRecord = {
@@ -236,9 +318,28 @@ const DonateRegisterPage: React.FC = () => {
           selfpayApplyNo: selfpayApplyNo,
           selfpayStatus: 'approved'
         };
-        addConsumption(approvedRecord);
-        Taro.showToast({ title: '登记成功，自费申请已生效', icon: 'success' });
-        setTimeout(() => Taro.switchTab({ url: '/pages/quota/index' }), 1000);
+        const newRecord = addConsumption(approvedRecord);
+        if (newRecord) {
+          Taro.showModal({
+            title: '✓ 献血登记成功！',
+            content: `献血凭证号：${newRecord.donationNo}`,
+            confirmText: '去查看献血凭证',
+            cancelText: '好的',
+            confirmColor: '#E53935',
+            success: (res) => {
+              if (res.confirm) {
+                Taro.navigateTo({
+                  url: `/pages/donate-certificate/index?donationNo=${encodeURIComponent(newRecord.donationNo)}`
+                });
+              } else {
+                Taro.switchTab({ url: '/pages/quota/index' });
+              }
+            }
+          });
+        } else {
+          Taro.showToast({ title: '登记成功，自费申请已生效', icon: 'success' });
+          setTimeout(() => Taro.switchTab({ url: '/pages/quota/index' }), 1000);
+        }
       } else {
         if (!selfpayReason.trim()) {
           Taro.showToast({ title: '请填写自费申请原因', icon: 'none' });
@@ -281,9 +382,28 @@ const DonateRegisterPage: React.FC = () => {
           selfpayApplyNo: apply.applyNo,
           selfpayStatus: 'pending'
         };
-        addConsumption(pendingRecord);
-        Taro.showToast({ title: '自费申请已提交', icon: 'success' });
-        setTimeout(() => Taro.switchTab({ url: '/pages/quota/index' }), 1000);
+        const newRecord = addConsumption(pendingRecord);
+        if (newRecord) {
+          Taro.showModal({
+            title: '✓ 自费申请已提交！',
+            content: `献血凭证号：${newRecord.donationNo}\n\n申请已提交，等待审批通过后生效。`,
+            confirmText: '去查看献血凭证',
+            cancelText: '好的',
+            confirmColor: '#E53935',
+            success: (res) => {
+              if (res.confirm) {
+                Taro.navigateTo({
+                  url: `/pages/donate-certificate/index?donationNo=${encodeURIComponent(newRecord.donationNo)}`
+                });
+              } else {
+                Taro.switchTab({ url: '/pages/quota/index' });
+              }
+            }
+          });
+        } else {
+          Taro.showToast({ title: '自费申请已提交', icon: 'success' });
+          setTimeout(() => Taro.switchTab({ url: '/pages/quota/index' }), 1000);
+        }
       }
     }
   };

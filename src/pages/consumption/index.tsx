@@ -171,6 +171,18 @@ const ConsumptionPage: React.FC = () => {
                 {record.remark && (
                   <View className={styles.remark}>备注：{record.remark}</View>
                 )}
+
+                <View className={styles.cardFooter}>
+                  <View
+                    className={styles.certBtn}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      Taro.navigateTo({ url: `/pages/donate-certificate/index?consumptionId=${record.id}` });
+                    }}
+                  >
+                    📄 献血凭证
+                  </View>
+                </View>
               </View>
             ))}
           </View>

@@ -17,7 +17,7 @@ interface GroupConfig {
 }
 
 const InventoryAlertPage: React.FC = () => {
-  const { bloodBatches } = useAppStore();
+  const { bloodBatches, processExpiredBatch } = useAppStore();
 
   const nearExpiry7 = useMemo(
     () =>
@@ -129,6 +129,36 @@ const InventoryAlertPage: React.FC = () => {
     }
   ];
 
+  const handleProcessBatch = (batch: BloodBatch, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    Taro.showModal({
+      title: '处理过期批次',
+      content: `批号：${batch.batchNo}\n血型：${batch.bloodType}型\n剩余库存：${batch.remainingQuantity}份`,
+      editable: true,
+      placeholderText: '请输入处理说明（必填）',
+      confirmText: '确认处理',
+      confirmColor: '#F53F3F',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          const remark = res.content?.trim();
+          if (!remark) {
+            Taro.showToast({ title: '请输入处理说明', icon: 'none' });
+            return;
+          }
+          
+          processExpiredBatch(batch.id, '管理员', remark);
+          Taro.showToast({ title: '处理成功，已记录操作日志', icon: 'success' });
+          
+          setTimeout(() => {
+            Taro.navigateTo({ url: `/pages/batch-detail/index?id=${batch.id}` });
+          }, 800);
+        }
+      }
+    });
+  };
+
   const renderDaysText = (batch: BloodBatch, color: 'red' | 'orange' | 'gray') => {
     if (batch.status === 'expired') {
       return (
@@ -161,6 +191,11 @@ const InventoryAlertPage: React.FC = () => {
         </View>
         {config.color === 'gray' && (
           <View className={styles.expiredWarn}>⚠️ 已过期切勿出库，请及时处理</View>
+        )}
+        {config.color === 'gray' && batch.status === 'expired' && batch.remainingQuantity > 0 && (
+          <View className={styles.processBtn} onClick={(e) => handleProcessBatch(batch, e)}>
+            处理
+          </View>
         )}
       </View>
 

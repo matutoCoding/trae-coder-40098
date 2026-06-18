@@ -9,7 +9,9 @@ import {
   getBloodTypeColor,
   getBloodTypeText,
   getStatusText,
-  formatDateTime
+  formatDateTime,
+  EXHAUSTED_BADGE_TEXT,
+  isBatchExhausted
 } from '@/utils';
 import dayjs from 'dayjs';
 import type { BloodType, InventoryLog, InventoryLogType, BloodBatch } from '@/types';
@@ -24,7 +26,7 @@ const logTypeConfig: Record<InventoryLogType, { icon: string; label: string }> =
   expired_lock: { icon: '🔒', label: '过期锁定' },
   manual_lock: { icon: '🔒', label: '手动锁定' },
   manual_unlock: { icon: '🔓', label: '解锁' },
-  adjust: { icon: '⚙️', label: '调整' }
+  adjust: { icon: '⚠️', label: '库存调整' }
 };
 
 const getChangeQtyText = (log: InventoryLog): string => {
@@ -82,7 +84,7 @@ const InventoryTrackerPage: React.FC = () => {
         filteredBatches = batches.filter(b => b.remainingQuantity === 0);
         break;
       case 'expired':
-        filteredBatches = batches.filter(b => b.status === 'expired');
+        filteredBatches = batches.filter(b => b.status === 'expired' && b.remainingQuantity > 0);
         break;
       default:
         filteredBatches = batches;
@@ -90,7 +92,7 @@ const InventoryTrackerPage: React.FC = () => {
 
     const allNear = bloodBatches.filter(b => b.daysToExpiry > 0 && b.daysToExpiry <= 30 && b.remainingQuantity > 0).length;
     const allExhausted = bloodBatches.filter(b => b.remainingQuantity === 0).length;
-    const allExpired = bloodBatches.filter(b => b.status === 'expired').length;
+    const allExpired = bloodBatches.filter(b => b.status === 'expired' && b.remainingQuantity > 0).length;
 
     return {
       filteredBatchIds: new Set(filteredBatches.map(b => b.id)),
@@ -199,6 +201,25 @@ const InventoryTrackerPage: React.FC = () => {
       );
     }
 
+    if (log.logType === 'adjust') {
+      return (
+        <View className={styles.logMeta}>
+          <View className={styles.metaRow}>
+            <View className={styles.metaItem}>
+              <Text className={styles.label}>处理人：</Text>
+              <Text>{log.operator}</Text>
+            </View>
+            {log.remark && (
+              <View className={styles.metaItem}>
+                <Text className={styles.label}>处理说明：</Text>
+                <Text>{log.remark}</Text>
+              </View>
+            )}
+          </View>
+        </View>
+      );
+    }
+
     return null;
   };
 
@@ -238,6 +259,9 @@ const InventoryTrackerPage: React.FC = () => {
                 onClick={() => setStatusFilter(opt.key)}
               >
                 {opt.label}
+                {opt.key === 'exhausted' && (
+                  <Text className={styles.exhaustedBadge}>{exhaustedCount}</Text>
+                )}
               </View>
             );
           })}
@@ -268,10 +292,11 @@ const InventoryTrackerPage: React.FC = () => {
           {filteredLogs.map(log => {
             const batch = batchMap.get(log.batchId);
             const bloodColor = getBloodTypeColor(log.bloodType);
+            const isExpiredProcess = log.logType === 'adjust' && log.remark?.includes('过期处理');
             return (
               <View
                 key={log.id}
-                className={styles.logItem}
+                className={classnames(styles.logItem, isExpiredProcess && styles.expiredProcessHighlight)}
                 onClick={() => handleGoToBatchDetail(log.batchId)}
               >
                 <View className={classnames(styles.dotIcon, styles[log.logType])} />
@@ -290,8 +315,8 @@ const InventoryTrackerPage: React.FC = () => {
                     >
                       {getBloodTypeText(log.bloodType)}
                     </View>
-                    <View className={classnames(styles.statusBadge, styles[batch.status])}>
-                      {getStatusText(batch.status)}
+                    <View className={classnames(styles.statusBadge, isBatchExhausted(batch) ? styles.exhausted : styles[batch.status])}>
+                      {isBatchExhausted(batch) ? EXHAUSTED_BADGE_TEXT : getStatusText(batch.status)}
                     </View>
                   </View>
                 )}

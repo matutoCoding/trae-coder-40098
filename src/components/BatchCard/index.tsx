@@ -3,7 +3,7 @@ import { View, Text } from '@tarojs/components';
 import styles from './index.module.scss';
 import classnames from 'classnames';
 import type { BloodBatch } from '@/types';
-import { formatDate, getUsageRate } from '@/utils';
+import { formatDate, getUsageRate, EXHAUSTED_BADGE_TEXT, isBatchExhausted } from '@/utils';
 import StatusTag from '@/components/StatusTag';
 
 interface BatchCardProps {
@@ -16,11 +16,17 @@ interface BatchCardProps {
 
 const BatchCard: React.FC<BatchCardProps> = ({ batch, onClick, showFifoBadge = false, showArrow = false, showExhausted = false }) => {
   const rate = getUsageRate(batch.usedQuantity, batch.quantity);
-  const isExhausted = batch.remainingQuantity === 0;
+  const isExhausted = isBatchExhausted(batch);
 
   const getExpiryBadge = () => {
+    if (isExhausted) {
+      return <View className={classnames(styles.expiryWarn, styles.exhausted)}>{EXHAUSTED_BADGE_TEXT}</View>;
+    }
     if (batch.status === 'expired') {
       return <View className={classnames(styles.expiryWarn, styles.danger)}>已过期</View>;
+    }
+    if (batch.status === 'locked') {
+      return <View className={classnames(styles.expiryWarn, styles.locked)}>已锁定</View>;
     }
     if (batch.status === 'near_expiry') {
       const dayText = batch.daysToExpiry === 0 ? '今日到期' : `${batch.daysToExpiry}天后过期`;
@@ -33,6 +39,7 @@ const BatchCard: React.FC<BatchCardProps> = ({ batch, onClick, showFifoBadge = f
     <View
       className={classnames(
         styles.batchCard,
+        isExhausted && styles.exhaustedCard,
         batch.status === 'expired' && styles.expiredCard,
         batch.status === 'near_expiry' && styles.nearExpiryCard
       )}
@@ -46,9 +53,9 @@ const BatchCard: React.FC<BatchCardProps> = ({ batch, onClick, showFifoBadge = f
           <View className={styles.tagsRow}>
             <StatusTag type={batch.bloodType} />
             {showExhausted && isExhausted && (
-              <View className={classnames(styles.exhaustedBadge)}>📦 已清空</View>
+              <View className={classnames(styles.exhaustedBadge)}>{EXHAUSTED_BADGE_TEXT}</View>
             )}
-            <StatusTag type={batch.status} />
+            {(!showExhausted || !isExhausted) && <StatusTag type={batch.status} />}
             {showFifoBadge && batch.status !== 'expired' && batch.status !== 'locked' && !isExhausted && (
               <View style={{
                 fontSize: '22rpx',

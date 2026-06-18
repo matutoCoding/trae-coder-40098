@@ -218,5 +218,31 @@
       color: $color-text-tertiary;
       line-height: 1.5;
     }
+
+    .cardFooter {
+      margin-top: $spacing-md;
+      padding-top: $spacing-md;
+      border-top: 1rpx solid $color-divider;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .certBtn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6rpx;
+      padding: 10rpx 24rpx;
+      border-radius: $radius-button;
+      background: rgba($color-success, 0.1);
+      color: $color-success;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      transition: all $transition-fast;
+
+      &:active {
+        background: rgba($color-success, 0.2);
+        transform: scale(0.97);
+      }
+    }
   }
 }

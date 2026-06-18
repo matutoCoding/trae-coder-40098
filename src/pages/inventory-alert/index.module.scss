@@ -240,6 +240,24 @@
     }
   }
 
+  .processBtn {
+    margin-top: $spacing-sm;
+    padding: $spacing-xs $spacing-md;
+    border-radius: $radius-button;
+    background: linear-gradient(135deg, #F53F3F 0%, #E53935 50%, #C62828 100%);
+    color: #fff;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    text-align: center;
+    box-shadow: 0 4rpx 12rpx rgba(245, 63, 63, 0.3);
+    transition: all $transition-base;
+
+    &:active {
+      transform: scale(0.96);
+      opacity: 0.9;
+    }
+  }
+
   .expiredWarn {
     margin-top: $spacing-xs;
     padding: $spacing-xs $spacing-sm;

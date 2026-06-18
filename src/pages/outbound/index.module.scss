@@ -1,0 +1,188 @@
+@use '@/styles/variables.scss' as *;
+
+.outboundPage {
+  min-height: 100vh;
+  padding: 0 $page-padding;
+  padding-bottom: 60rpx;
+  padding-top: $spacing-lg;
+  box-sizing: border-box;
+}
+
+.tipBanner {
+  background: linear-gradient(135deg, rgba(255, 125, 0, 0.1) 0%, rgba(0, 180, 42, 0.1) 100%);
+  border: 1rpx solid rgba(0, 180, 42, 0.2);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-md;
+
+  .tipIcon {
+    font-size: 40rpx;
+    flex-shrink: 0;
+  }
+
+  .tipContent {
+    flex: 1;
+  }
+
+  .tipTitle {
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    color: $color-success;
+    margin-bottom: 4rpx;
+  }
+
+  .tipText {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    line-height: 1.6;
+  }
+}
+
+.tabBar {
+  display: flex;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-lg;
+  padding: 6rpx;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  box-shadow: $shadow-card;
+
+  .tabItem {
+    flex: 1;
+    height: $button-height-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $radius-button;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-text-secondary;
+    transition: all $transition-base;
+
+    &.active {
+      background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-light 100%);
+      color: $color-text-white;
+      font-weight: $font-weight-semibold;
+      box-shadow: 0 4rpx 12rpx rgba(25, 118, 210, 0.25);
+    }
+  }
+}
+
+.actionBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-md;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-success 0%, #26C24F 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-lg;
+  box-shadow: 0 4rpx 16rpx rgba(0, 180, 42, 0.25);
+
+  &:active {
+    transform: scale(0.99);
+    opacity: 0.9;
+  }
+}
+
+.fifoHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-sm;
+
+  .title {
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+  }
+
+  .badge {
+    padding: 4rpx 12rpx;
+    border-radius: $radius-xs;
+    background: rgba(0, 180, 42, 0.15);
+    color: $color-success;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.outboundCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: $spacing-md;
+
+    .outboundNo {
+      font-size: $font-size-md;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+    }
+
+    .date {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+    }
+  }
+
+  .infoGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-sm;
+    margin-bottom: $spacing-md;
+    padding-bottom: $spacing-md;
+    border-bottom: 1rpx solid $color-divider;
+
+    .infoItem {
+      .label {
+        font-size: $font-size-xs;
+        color: $color-text-tertiary;
+        margin-bottom: 2rpx;
+      }
+
+      .value {
+        font-size: $font-size-sm;
+        color: $color-text-primary;
+        font-weight: $font-weight-medium;
+      }
+
+      &.highlight .value {
+        color: $color-primary;
+        font-size: $font-size-lg;
+      }
+    }
+  }
+
+  .purpose {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-sm;
+    line-height: 1.5;
+
+    &::before {
+      content: '用途：';
+      color: $color-text-tertiary;
+    }
+  }
+
+  .operator {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+    display: flex;
+    justify-content: space-between;
+  }
+}

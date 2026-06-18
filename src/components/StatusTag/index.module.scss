@@ -1,0 +1,83 @@
+@use '@/styles/variables.scss' as *;
+
+.statusTag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  line-height: 1.4;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+
+  &.normal {
+    background: rgba(0, 180, 42, 0.12);
+    color: $color-success;
+  }
+
+  &.nearExpiry {
+    background: rgba(255, 125, 0, 0.12);
+    color: $color-warning;
+  }
+
+  &.expired {
+    background: rgba(245, 63, 63, 0.12);
+    color: $color-error;
+  }
+
+  &.locked {
+    background: rgba(134, 144, 156, 0.12);
+    color: $color-text-tertiary;
+  }
+
+  &.quota {
+    background: rgba(229, 57, 53, 0.12);
+    color: $color-primary;
+  }
+
+  &.selfpay {
+    background: rgba(25, 118, 210, 0.12);
+    color: $color-secondary;
+  }
+
+  &.pending {
+    background: rgba(25, 118, 210, 0.12);
+    color: $color-info;
+  }
+
+  &.approved {
+    background: rgba(0, 180, 42, 0.12);
+    color: $color-success;
+  }
+
+  &.rejected {
+    background: rgba(245, 63, 63, 0.12);
+    color: $color-error;
+  }
+
+  &.completed {
+    background: rgba(0, 180, 42, 0.12);
+    color: $color-success;
+  }
+
+  &.bloodA {
+    background: rgba(239, 83, 80, 0.15);
+    color: #EF5350;
+  }
+
+  &.bloodB {
+    background: rgba(66, 165, 245, 0.15);
+    color: #42A5F5;
+  }
+
+  &.bloodAB {
+    background: rgba(171, 71, 188, 0.15);
+    color: #AB47BC;
+  }
+
+  &.bloodO {
+    background: rgba(102, 187, 106, 0.15);
+    color: #66BB6A;
+  }
+}

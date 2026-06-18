@@ -1,0 +1,33 @@
+@use '@/styles/variables.scss' as *;
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl * 2 $spacing-lg;
+
+  .iconWrap {
+    width: 160rpx;
+    height: 160rpx;
+    border-radius: 50%;
+    background: rgba(229, 57, 53, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: $spacing-lg;
+    font-size: 80rpx;
+    opacity: 0.5;
+  }
+
+  .text {
+    font-size: $font-size-md;
+    color: $color-text-tertiary;
+    margin-bottom: $spacing-xs;
+  }
+
+  .subText {
+    font-size: $font-size-sm;
+    color: $color-text-disabled;
+  }
+}

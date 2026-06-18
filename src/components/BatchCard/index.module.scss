@@ -1,0 +1,150 @@
+@use '@/styles/variables.scss' as *;
+
+.batchCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+  transition: all $transition-base;
+  position: relative;
+  overflow: hidden;
+
+  &:active {
+    transform: scale(0.99);
+  }
+
+  &.expiredCard {
+    opacity: 0.7;
+  }
+
+  &.nearExpiryCard {
+    border-left: 6rpx solid $color-warning;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: $spacing-md;
+
+    .left {
+      flex: 1;
+    }
+
+    .batchNo {
+      font-size: $font-size-md;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+      margin-right: $spacing-sm;
+    }
+
+    .tagsRow {
+      display: flex;
+      gap: $spacing-xs;
+      margin-top: $spacing-xs;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+  }
+
+  .statsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $spacing-md;
+    padding: $spacing-md 0;
+    border-top: 1rpx solid $color-divider;
+    border-bottom: 1rpx solid $color-divider;
+    margin-bottom: $spacing-md;
+
+    .stat {
+      text-align: center;
+
+      .value {
+        font-size: $font-size-xl;
+        font-weight: $font-weight-bold;
+        line-height: 1.2;
+      }
+
+      .label {
+        font-size: $font-size-xs;
+        color: $color-text-tertiary;
+        margin-top: 4rpx;
+      }
+
+      &.primary .value {
+        color: $color-primary;
+      }
+
+      &.success .value {
+        color: $color-success;
+      }
+
+      &.warning .value {
+        color: $color-warning;
+      }
+    }
+  }
+
+  .progressRow {
+    margin-bottom: $spacing-md;
+
+    .progressInfo {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: $spacing-xs;
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+
+      .remain {
+        color: $color-success;
+        font-weight: $font-weight-medium;
+      }
+    }
+
+    .bar {
+      height: 12rpx;
+      background: $color-bg-hover;
+      border-radius: $radius-round;
+      overflow: hidden;
+
+      .fill {
+        height: 100%;
+        border-radius: $radius-round;
+        background: linear-gradient(90deg, $color-secondary-light 0%, $color-secondary 100%);
+      }
+    }
+  }
+
+  .infoRow {
+    display: flex;
+    justify-content: space-between;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+
+    .site {
+      display: flex;
+      align-items: center;
+      gap: 4rpx;
+    }
+  }
+
+  .expiryWarn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 8rpx 16rpx 8rpx 24rpx;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: #fff;
+    border-bottom-left-radius: $radius-lg;
+
+    &.warn {
+      background: linear-gradient(135deg, $color-warning 0%, #FF8F00 100%);
+    }
+
+    &.danger {
+      background: linear-gradient(135deg, $color-error 0%, #C62828 100%);
+    }
+  }
+}

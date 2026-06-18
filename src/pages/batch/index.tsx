@@ -1,0 +1,146 @@
+import React, { useState, useMemo } from 'react';
+import { View, Text, ScrollView, Button } from '@tarojs/components';
+import Taro from '@tarojs/taro';
+import { useAppStore } from '@/store';
+import styles from './index.module.scss';
+import BatchCard from '@/components/BatchCard';
+import SectionHeader from '@/components/SectionHeader';
+import EmptyState from '@/components/EmptyState';
+import classnames from 'classnames';
+import { getBloodTypeColor } from '@/utils';
+import type { BatchStatus, BloodType } from '@/types';
+
+type StatusFilter = 'all' | BatchStatus;
+
+const BatchPage: React.FC = () => {
+  const [typeFilter, setTypeFilter] = useState<BloodType | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+
+  const { bloodBatches, getExpiringBatches, getExpiredBatches } = useAppStore();
+
+  const expiring = useMemo(() => getExpiringBatches(), [getExpiringBatches]);
+  const expired = useMemo(() => getExpiredBatches(), [getExpiredBatches]);
+  const normalCount = useMemo(
+    () => bloodBatches.filter(b => b.status === 'normal').length,
+    [bloodBatches]
+  );
+  const lockedCount = useMemo(
+    () => bloodBatches.filter(b => b.status === 'locked').length,
+    [bloodBatches]
+  );
+
+  const filteredBatches = useMemo(() => {
+    let list = bloodBatches;
+    if (typeFilter !== 'all') {
+      list = list.filter(b => b.bloodType === typeFilter);
+    }
+    if (statusFilter !== 'all') {
+      list = list.filter(b => b.status === statusFilter);
+    }
+    return list.sort((a, b) => a.daysToExpiry - b.daysToExpiry);
+  }, [bloodBatches, typeFilter, statusFilter]);
+
+  const statusFilters = [
+    { key: 'all', label: '全部' },
+    { key: 'normal', label: '正常' },
+    { key: 'near_expiry', label: `临期(${expiring.length})` },
+    { key: 'expired', label: `过期(${expired.length})` },
+    { key: 'locked', label: '锁定' }
+  ];
+
+  const bloodTypes: { key: BloodType | 'all'; label: string }[] = [
+    { key: 'all', label: '全部' },
+    { key: 'A', label: 'A' },
+    { key: 'B', label: 'B' },
+    { key: 'AB', label: 'AB' },
+    { key: 'O', label: 'O' }
+  ];
+
+  const typeColors = bloodTypes.map(t => {
+    if (t.key === 'all') return '#4E5969';
+    return getBloodTypeColor(t.key as BloodType);
+  });
+
+  return (
+    <View className={styles.batchPage}>
+      <View className={styles.overviewRow}>
+        <View className={classnames(styles.overviewItem, styles.normal)}>
+          <Text className={styles.value}>{normalCount}</Text>
+          <Text className={styles.label}>正常</Text>
+        </View>
+        <View className={classnames(styles.overviewItem, styles.warn)}>
+          <Text className={styles.value}>{expiring.length}</Text>
+          <Text className={styles.label}>临期</Text>
+        </View>
+        <View className={classnames(styles.overviewItem, styles.danger)}>
+          <Text className={styles.value}>{expired.length}</Text>
+          <Text className={styles.label}>过期</Text>
+        </View>
+        <View className={classnames(styles.overviewItem, styles.locked)}>
+          <Text className={styles.value}>{lockedCount}</Text>
+          <Text className={styles.label}>锁定</Text>
+        </View>
+      </View>
+
+      <View className={styles.typeBar}>
+        {bloodTypes.map((bt, idx) => (
+          <View
+            key={bt.key}
+            className={classnames(styles.typeItem, typeFilter === bt.key && styles.active)}
+            style={{
+              color: typeFilter === bt.key ? '#fff' : typeColors[idx],
+              background: typeFilter === bt.key
+                ? `linear-gradient(135deg, ${typeColors[idx]} 0%, ${typeColors[idx]}dd 100%)`
+                : undefined,
+              border: typeFilter === bt.key ? 'none' : `2rpx solid ${typeColors[idx]}40`
+            }}
+            onClick={() => setTypeFilter(bt.key)}
+          >
+            <Text>{bt.label}</Text>
+          </View>
+        ))}
+      </View>
+
+      <ScrollView scrollX className={styles.filterBar}>
+        {statusFilters.map(f => (
+          <View
+            key={f.key}
+            className={classnames(styles.filterItem, statusFilter === f.key && styles.active)}
+            onClick={() => setStatusFilter(f.key as StatusFilter)}
+          >
+            <Text>{f.label}</Text>
+          </View>
+        ))}
+      </ScrollView>
+
+      <Button
+        className={styles.actionBtn}
+        onClick={() => Taro.navigateTo({ url: '/pages/batch-register/index' })}
+      >
+        ＋ 批次效期登记
+      </Button>
+
+      <SectionHeader
+        title="批次列表"
+        subTitle={`${filteredBatches.length}条`}
+        showArrow={expiring.length > 0}
+        actionText="出库管理"
+        onActionClick={() => Taro.navigateTo({ url: '/pages/outbound/index' })}
+      />
+
+      <View>
+        {filteredBatches.length > 0 ? (
+          <View>
+            {filteredBatches.map(batch => (
+              <BatchCard key={batch.id} batch={batch} />
+            ))}
+          </View>
+        ) : (
+          <EmptyState text="暂无批次数据" icon="🩸" />
+        )}
+      </View>
+    </View>
+  );
+};
+
+export default BatchPage;

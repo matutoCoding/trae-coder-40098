@@ -1,0 +1,46 @@
+@use '@/styles/variables.scss' as *;
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-lg 0 $spacing-md;
+
+  .titleRow {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  .indicator {
+    width: 6rpx;
+    height: 32rpx;
+    border-radius: $radius-xs;
+    background: linear-gradient(180deg, $color-primary 0%, $color-primary-light 100%);
+  }
+
+  .title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+  }
+
+  .subTitle {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+    margin-left: $spacing-xs;
+  }
+
+  .action {
+    display: flex;
+    align-items: center;
+    gap: 4rpx;
+    font-size: $font-size-sm;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+
+    .arrow {
+      font-size: $font-size-xs;
+    }
+  }
+}

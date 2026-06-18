@@ -1,0 +1,138 @@
+export type BloodType = 'A' | 'B' | 'AB' | 'O';
+
+export type QuotaCycle = 'monthly' | 'quarterly' | 'yearly';
+
+export type BatchStatus = 'normal' | 'near_expiry' | 'expired' | 'locked';
+
+export type ConsumptionType = 'quota' | 'selfpay';
+
+export type OutboundStatus = 'pending' | 'approved' | 'rejected' | 'completed';
+
+export type ApplyStatus = 'pending' | 'approved' | 'rejected';
+
+export interface Organization {
+  id: string;
+  name: string;
+  quotaCycle: QuotaCycle;
+}
+
+export interface QuotaInfo {
+  id: string;
+  orgId: string;
+  orgName: string;
+  totalQuota: number;
+  usedQuota: number;
+  remainingQuota: number;
+  cycleStart: string;
+  cycleEnd: string;
+  cycle: QuotaCycle;
+  selfpayCount: number;
+}
+
+export interface QuotaDistributionRecord {
+  id: string;
+  orgId: string;
+  orgName: string;
+  quotaAmount: number;
+  cycle: QuotaCycle;
+  distributeDate: string;
+  operator: string;
+  remark?: string;
+}
+
+export interface Donor {
+  id: string;
+  name: string;
+  idCard: string;
+  bloodType: BloodType;
+  phone: string;
+  lastDonateDate?: string;
+  donateCount: number;
+}
+
+export interface ConsumptionRecord {
+  id: string;
+  donorId: string;
+  donorName: string;
+  bloodType: BloodType;
+  orgId: string;
+  orgName: string;
+  type: ConsumptionType;
+  amount: number;
+  donateDate: string;
+  batchNo?: string;
+  intervalCheckPassed: boolean;
+  daysSinceLastDonate?: number;
+  operator: string;
+  remark?: string;
+}
+
+export interface BloodBatch {
+  id: string;
+  batchNo: string;
+  bloodType: BloodType;
+  collectionDate: string;
+  expiryDate: string;
+  quantity: number;
+  usedQuantity: number;
+  remainingQuantity: number;
+  status: BatchStatus;
+  daysToExpiry: number;
+  collectionSite: string;
+  donorCount: number;
+}
+
+export interface OutboundRecord {
+  id: string;
+  outboundNo: string;
+  batchId: string;
+  batchNo: string;
+  bloodType: BloodType;
+  quantity: number;
+  outboundDate: string;
+  receiver: string;
+  receiverDept: string;
+  purpose: string;
+  status: OutboundStatus;
+  isFifoRecommended: boolean;
+  operator: string;
+  approvalRemark?: string;
+}
+
+export interface SelfpayApply {
+  id: string;
+  applyNo: string;
+  orgId: string;
+  orgName: string;
+  applicant: string;
+  applyDate: string;
+  exceedCount: number;
+  reason: string;
+  status: ApplyStatus;
+  approver?: string;
+  approvalDate?: string;
+  approvalRemark?: string;
+}
+
+export interface DashboardStats {
+  totalQuota: number;
+  usedQuota: number;
+  remainingQuota: number;
+  quotaUsageRate: number;
+  totalBatches: number;
+  nearExpiryCount: number;
+  expiredCount: number;
+  totalOutbound: number;
+  monthlyDonations: number;
+  selfpayApplications: number;
+  pendingApprovals: number;
+}
+
+export interface StatCardItem {
+  label: string;
+  value: string | number;
+  unit?: string;
+  trend?: string;
+  color?: string;
+  bgColor?: string;
+}

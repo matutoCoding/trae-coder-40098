@@ -1,0 +1,126 @@
+import type { ConsumptionRecord } from '@/types';
+import dayjs from 'dayjs';
+
+const today = dayjs();
+
+export const mockConsumptionRecords: ConsumptionRecord[] = [
+  {
+    id: 'C001',
+    donorId: 'D001',
+    donorName: '张伟',
+    bloodType: 'A',
+    orgId: 'ORG001',
+    orgName: '市第一人民医院',
+    type: 'quota',
+    amount: 1,
+    donateDate: today.subtract(1, 'day').format('YYYY-MM-DD'),
+    batchNo: 'BT20250610A001',
+    intervalCheckPassed: true,
+    daysSinceLastDonate: 195,
+    operator: '李护士',
+    remark: '常规献血'
+  },
+  {
+    id: 'C002',
+    donorId: 'D002',
+    donorName: '王芳',
+    bloodType: 'O',
+    orgId: 'ORG001',
+    orgName: '市第一人民医院',
+    type: 'quota',
+    amount: 1,
+    donateDate: today.subtract(2, 'day').format('YYYY-MM-DD'),
+    batchNo: 'BT20250609O002',
+    intervalCheckPassed: true,
+    daysSinceLastDonate: 210,
+    operator: '李护士'
+  },
+  {
+    id: 'C003',
+    donorId: 'D003',
+    donorName: '刘强',
+    bloodType: 'B',
+    orgId: 'ORG001',
+    orgName: '市第一人民医院',
+    type: 'selfpay',
+    amount: 1,
+    donateDate: today.subtract(3, 'day').format('YYYY-MM-DD'),
+    batchNo: 'BT20250608B003',
+    intervalCheckPassed: true,
+    operator: '李护士',
+    remark: '超额自费'
+  },
+  {
+    id: 'C004',
+    donorId: 'D004',
+    donorName: '陈静',
+    bloodType: 'AB',
+    orgId: 'ORG001',
+    orgName: '市第一人民医院',
+    type: 'quota',
+    amount: 1,
+    donateDate: today.subtract(5, 'day').format('YYYY-MM-DD'),
+    batchNo: 'BT20250606AB004',
+    intervalCheckPassed: true,
+    operator: '王医生'
+  },
+  {
+    id: 'C005',
+    donorId: 'D005',
+    donorName: '李明',
+    bloodType: 'A',
+    orgId: 'ORG001',
+    orgName: '市第一人民医院',
+    type: 'quota',
+    amount: 1,
+    donateDate: today.subtract(7, 'day').format('YYYY-MM-DD'),
+    batchNo: 'BT20250604A005',
+    intervalCheckPassed: true,
+    daysSinceLastDonate: 200,
+    operator: '李护士'
+  },
+  {
+    id: 'C006',
+    donorId: 'D006',
+    donorName: '赵琳',
+    bloodType: 'O',
+    orgId: 'ORG002',
+    orgName: '市中心血站',
+    type: 'quota',
+    amount: 1,
+    donateDate: today.subtract(4, 'day').format('YYYY-MM-DD'),
+    batchNo: 'BT20250607O006',
+    intervalCheckPassed: true,
+    operator: '张护士'
+  },
+  {
+    id: 'C007',
+    donorId: 'D007',
+    donorName: '孙磊',
+    bloodType: 'B',
+    orgId: 'ORG001',
+    orgName: '市第一人民医院',
+    type: 'quota',
+    amount: 1,
+    donateDate: today.subtract(10, 'day').format('YYYY-MM-DD'),
+    batchNo: 'BT20250601B007',
+    intervalCheckPassed: false,
+    daysSinceLastDonate: 90,
+    operator: '李护士',
+    remark: '特殊情况审批通过'
+  },
+  {
+    id: 'C008',
+    donorId: 'D008',
+    donorName: '周雯',
+    bloodType: 'A',
+    orgId: 'ORG003',
+    orgName: '市第二人民医院',
+    type: 'selfpay',
+    amount: 1,
+    donateDate: today.subtract(6, 'day').format('YYYY-MM-DD'),
+    batchNo: 'BT20250605A008',
+    intervalCheckPassed: true,
+    operator: '赵护士'
+  }
+];

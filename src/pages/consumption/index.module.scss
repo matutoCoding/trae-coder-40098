@@ -1,0 +1,185 @@
+@use '@/styles/variables.scss' as *;
+
+.consumptionPage {
+  min-height: 100vh;
+  padding: 0 $page-padding;
+  padding-bottom: 60rpx;
+  padding-top: $spacing-lg;
+  box-sizing: border-box;
+}
+
+.summaryCard {
+  background: linear-gradient(135deg, $color-primary-light 0%, $color-primary 100%);
+  border-radius: $radius-xl;
+  padding: $spacing-xl;
+  margin-bottom: $spacing-lg;
+  color: $color-text-white;
+  box-shadow: 0 8rpx 24rpx rgba(229, 57, 53, 0.25);
+
+  .summaryTitle {
+    font-size: $font-size-sm;
+    opacity: 0.9;
+    margin-bottom: $spacing-sm;
+  }
+
+  .summaryValue {
+    font-size: 64rpx;
+    font-weight: $font-weight-bold;
+    line-height: 1;
+    margin-bottom: $spacing-xs;
+  }
+
+  .summaryUnit {
+    font-size: $font-size-sm;
+    opacity: 0.85;
+    margin-left: $spacing-xs;
+  }
+
+  .summaryGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $spacing-md;
+    margin-top: $spacing-lg;
+    padding-top: $spacing-lg;
+    border-top: 1rpx solid rgba(255, 255, 255, 0.2);
+
+    .gridItem {
+      text-align: center;
+
+      .value {
+        font-size: $font-size-xl;
+        font-weight: $font-weight-bold;
+        line-height: 1.2;
+      }
+
+      .label {
+        font-size: $font-size-xs;
+        opacity: 0.85;
+        margin-top: 4rpx;
+      }
+    }
+  }
+}
+
+.filterBar {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-xs;
+
+  .filterItem {
+    flex-shrink: 0;
+    padding: 12rpx 28rpx;
+    border-radius: $radius-button;
+    background: $color-bg-card;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    box-shadow: $shadow-card;
+    transition: all $transition-base;
+
+    &.active {
+      background: $color-primary;
+      color: $color-text-white;
+      font-weight: $font-weight-semibold;
+      box-shadow: 0 4rpx 12rpx rgba(229, 57, 53, 0.2);
+    }
+  }
+}
+
+.actionBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-md;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary-light 0%, $color-primary 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-lg;
+  box-shadow: 0 4rpx 16rpx rgba(229, 57, 53, 0.25);
+
+  &:active {
+    transform: scale(0.99);
+    opacity: 0.9;
+  }
+}
+
+.recordList {
+  .recordCard {
+    background: $color-bg-card;
+    border-radius: $radius-lg;
+    padding: $spacing-lg;
+    margin-bottom: $spacing-md;
+    box-shadow: $shadow-card;
+    transition: all $transition-base;
+
+    &:active {
+      transform: scale(0.99);
+    }
+
+    .cardHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: $spacing-md;
+
+      .left {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .donorInfo {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        margin-bottom: 4rpx;
+        flex-wrap: wrap;
+      }
+
+      .donorName {
+        font-size: $font-size-lg;
+        font-weight: $font-weight-semibold;
+        color: $color-text-primary;
+      }
+
+      .cardBody {
+        display: flex;
+        justify-content: space-between;
+        font-size: $font-size-sm;
+        color: $color-text-secondary;
+
+        .col {
+          display: flex;
+          flex-direction: column;
+          gap: 4rpx;
+
+          &.right {
+            align-items: flex-end;
+          }
+        }
+
+        .highlight {
+          color: $color-primary;
+          font-weight: $font-weight-semibold;
+        }
+
+        .warn {
+          color: $color-warning;
+        }
+
+        .danger {
+          color: $color-error;
+        }
+      }
+    }
+
+    .remark {
+      margin-top: $spacing-md;
+      padding-top: $spacing-md;
+      border-top: 1rpx solid $color-divider;
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+      line-height: 1.5;
+    }
+  }
+}

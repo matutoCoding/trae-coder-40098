@@ -29,6 +29,19 @@ const BatchPage: React.FC = () => {
     [bloodBatches]
   );
 
+  const alertCount7 = useMemo(
+    () => bloodBatches.filter(b => b.daysToExpiry <= 7 && b.daysToExpiry > 0 && b.remainingQuantity > 0).length,
+    [bloodBatches]
+  );
+  const alertCount30 = useMemo(
+    () => bloodBatches.filter(b => b.daysToExpiry > 7 && b.daysToExpiry <= 30 && b.remainingQuantity > 0).length,
+    [bloodBatches]
+  );
+  const alertCountExpired = useMemo(
+    () => bloodBatches.filter(b => b.status === 'expired' && b.remainingQuantity > 0).length,
+    [bloodBatches]
+  );
+
   const filteredBatches = useMemo(() => {
     let list = bloodBatches;
     if (typeFilter !== 'all') {
@@ -79,6 +92,34 @@ const BatchPage: React.FC = () => {
         <View className={classnames(styles.overviewItem, styles.locked)}>
           <Text className={styles.value}>{lockedCount}</Text>
           <Text className={styles.label}>锁定</Text>
+        </View>
+      </View>
+
+      <View
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '24rpx 28rpx',
+          background: 'linear-gradient(135deg, rgba(245, 63, 63, 0.08) 0%, rgba(255, 125, 0, 0.08) 100%)',
+          borderRadius: '16rpx',
+          border: '1rpx solid rgba(245, 63, 63, 0.2)',
+          marginBottom: '24rpx',
+          cursor: 'pointer'
+        }}
+        onClick={() => Taro.navigateTo({ url: '/pages/inventory-alert/index' })}
+      >
+        <View style={{ display: 'flex', alignItems: 'center', gap: '12rpx' }}>
+          <Text style={{ fontSize: '32rpx' }}>🚨</Text>
+          <Text style={{ fontSize: '28rpx', fontWeight: '600', color: '#1D2129' }}>库存预警中心</Text>
+        </View>
+        <View style={{ display: 'flex', alignItems: 'center', gap: '16rpx' }}>
+          <Text style={{ fontSize: '24rpx', color: '#F53F3F', fontWeight: '500' }}>7天{alertCount7}</Text>
+          <Text style={{ color: '#C9CDD4' }}>·</Text>
+          <Text style={{ fontSize: '24rpx', color: '#FF7D00', fontWeight: '500' }}>30天{alertCount30}</Text>
+          <Text style={{ color: '#C9CDD4' }}>·</Text>
+          <Text style={{ fontSize: '24rpx', color: '#86909C', fontWeight: '500' }}>过期{alertCountExpired}</Text>
+          <Text style={{ fontSize: '32rpx', color: '#86909C', marginLeft: '4rpx' }}>›</Text>
         </View>
       </View>
 

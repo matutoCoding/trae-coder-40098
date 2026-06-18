@@ -16,13 +16,28 @@ const OutboundPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('fifo');
   const [statusFilter, setStatusFilter] = useState<OutboundStatus | 'all'>('all');
 
-  const { getFifoRecommendedBatches, outboundRecords } = useAppStore();
+  const { getFifoRecommendedBatches, outboundRecords, bloodBatches } = useAppStore();
 
   const fifoBatches = useMemo(() => getFifoRecommendedBatches(), [getFifoRecommendedBatches]);
   const fifoTotalQty = useMemo(
     () => fifoBatches.reduce((sum, b) => sum + b.remainingQuantity, 0),
     [fifoBatches]
   );
+
+  const alertCount7 = useMemo(
+    () => bloodBatches.filter(b => b.daysToExpiry <= 7 && b.daysToExpiry > 0 && b.remainingQuantity > 0).length,
+    [bloodBatches]
+  );
+  const alertCount30 = useMemo(
+    () => bloodBatches.filter(b => b.daysToExpiry > 7 && b.daysToExpiry <= 30 && b.remainingQuantity > 0).length,
+    [bloodBatches]
+  );
+  const alertCountExpired = useMemo(
+    () => bloodBatches.filter(b => b.status === 'expired' && b.remainingQuantity > 0).length,
+    [bloodBatches]
+  );
+
+  const hasAlert = alertCount7 + alertCount30 + alertCountExpired > 0;
 
   const filteredRecords = useMemo(() => {
     let list = outboundRecords;
@@ -55,7 +70,57 @@ const OutboundPage: React.FC = () => {
             系统自动按效期优先排序推荐出库批次，有效期近的批次优先出库，有效减少血液过期浪费。临期批次（≤30天）会高亮提醒。
           </Text>
         </View>
+        <View
+          className={styles.trackerEntry}
+          onClick={() => Taro.navigateTo({ url: '/pages/inventory-tracker/index' })}
+        >
+          🔍 批次追踪
+        </View>
       </View>
+
+      {hasAlert && (
+        <View
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '16rpx 24rpx',
+            background: 'rgba(255, 125, 0, 0.06)',
+            borderRadius: '12rpx',
+            border: '1rpx solid rgba(255, 125, 0, 0.18)',
+            marginBottom: '20rpx',
+            cursor: 'pointer'
+          }}
+          onClick={() => Taro.navigateTo({ url: '/pages/inventory-alert/index' })}
+        >
+          <View style={{ display: 'flex', alignItems: 'center', gap: '10rpx', flex: 1, flexWrap: 'wrap' }}>
+            <Text style={{ fontSize: '26rpx' }}>⚠️</Text>
+            <Text style={{ fontSize: '24rpx', color: '#4E5969', fontWeight: '500' }}>预警：</Text>
+            {alertCount7 > 0 && (
+              <Text style={{ fontSize: '24rpx', color: '#F53F3F', fontWeight: '500' }}>
+                {alertCount7}批7天内到期
+              </Text>
+            )}
+            {alertCount7 > 0 && (alertCount30 > 0 || alertCountExpired > 0) && (
+              <Text style={{ color: '#C9CDD4', margin: '0 6rpx' }}>·</Text>
+            )}
+            {alertCount30 > 0 && (
+              <Text style={{ fontSize: '24rpx', color: '#FF7D00', fontWeight: '500' }}>
+                {alertCount30}批30天内
+              </Text>
+            )}
+            {alertCount30 > 0 && alertCountExpired > 0 && (
+              <Text style={{ color: '#C9CDD4', margin: '0 6rpx' }}>·</Text>
+            )}
+            {alertCountExpired > 0 && (
+              <Text style={{ fontSize: '24rpx', color: '#86909C', fontWeight: '500' }}>
+                {alertCountExpired}批过期有库存
+              </Text>
+            )}
+          </View>
+          <Text style={{ fontSize: '28rpx', color: '#86909C', flexShrink: 0, marginLeft: '8rpx' }}>›</Text>
+        </View>
+      )}
 
       <View className={styles.tabBar}>
         {tabs.map(tab => (

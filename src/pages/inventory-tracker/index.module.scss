@@ -1,0 +1,389 @@
+@use '../../styles/theme.scss' as *;
+@use '../../styles/variables.scss' as *;
+
+.trackerPage {
+  min-height: 100vh;
+  padding: 0 $page-padding;
+  padding-bottom: 60rpx;
+  padding-top: $spacing-lg;
+  box-sizing: border-box;
+  background: $color-bg-page;
+}
+
+.topBar {
+  margin-bottom: $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.filterGroup {
+  display: flex;
+  gap: $spacing-sm;
+  overflow-x: auto;
+  padding-bottom: $spacing-xs;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+
+  .filterItem {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14rpx 32rpx;
+    border-radius: $radius-button;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    border: 2rpx solid $color-border;
+    background: $color-bg-card;
+    color: $color-text-secondary;
+    transition: all $transition-base;
+    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+
+    &.active {
+      color: $color-text-white;
+      border-color: transparent;
+      box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.12);
+    }
+  }
+}
+
+.statusTabs {
+  display: flex;
+  gap: $spacing-sm;
+  overflow-x: auto;
+  padding-bottom: $spacing-xs;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+
+  .tabItem {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14rpx 28rpx;
+    border-radius: $radius-button;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    background: $color-bg-card;
+    color: $color-text-secondary;
+    border: 2rpx solid transparent;
+    transition: all $transition-base;
+    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+
+    &.activeAll {
+      background: $color-secondary;
+      color: $color-text-white;
+      border-color: $color-secondary;
+      box-shadow: 0 4rpx 16rpx rgba(25, 118, 210, 0.25);
+    }
+
+    &.activeNear {
+      background: $color-warning;
+      color: $color-text-white;
+      border-color: $color-warning;
+      box-shadow: 0 4rpx 16rpx rgba(255, 125, 0, 0.25);
+    }
+
+    &.activeExhausted {
+      background: $color-text-tertiary;
+      color: $color-text-white;
+      border-color: $color-text-tertiary;
+      box-shadow: 0 4rpx 16rpx rgba(134, 144, 156, 0.25);
+    }
+
+    &.activeExpired {
+      background: $color-error;
+      color: $color-text-white;
+      border-color: $color-error;
+      box-shadow: 0 4rpx 16rpx rgba(245, 63, 63, 0.25);
+    }
+  }
+}
+
+.summaryRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+
+  .summaryItem {
+    background: $color-bg-card;
+    border-radius: $radius-md;
+    padding: $spacing-md $spacing-sm;
+    text-align: center;
+    box-shadow: $shadow-card;
+
+    .value {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-bold;
+      line-height: 1.2;
+      color: $color-text-primary;
+      margin-bottom: 4rpx;
+
+      &.total {
+        color: $color-secondary;
+      }
+
+      &.near {
+        color: $color-warning;
+      }
+
+      &.exhausted {
+        color: $color-text-tertiary;
+      }
+
+      &.expired {
+        color: $color-error;
+      }
+    }
+
+    .label {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+    }
+  }
+}
+
+.inventoryList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.logItem {
+  position: relative;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-md $spacing-md $spacing-md 72rpx;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+.dotIcon {
+  position: absolute;
+  left: $spacing-md;
+  top: $spacing-md;
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  z-index: 2;
+
+  &.inbound {
+    background: $color-success;
+    box-shadow: 0 0 0 6rpx rgba(0, 180, 42, 0.15);
+  }
+
+  &.outbound {
+    background: $color-secondary;
+    box-shadow: 0 0 0 6rpx rgba(25, 118, 210, 0.15);
+  }
+
+  &.exhausted {
+    background: $color-warning;
+    box-shadow: 0 0 0 6rpx rgba(255, 125, 0, 0.15);
+  }
+
+  &.expired_lock,
+  &.manual_lock {
+    background: $color-error;
+    box-shadow: 0 0 0 6rpx rgba(245, 63, 63, 0.15);
+  }
+
+  &.manual_unlock,
+  &.adjust {
+    background: $color-text-tertiary;
+    box-shadow: 0 0 0 6rpx rgba(134, 144, 156, 0.15);
+  }
+}
+
+.logHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+
+  .logTypeBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6rpx;
+    padding: 6rpx 16rpx;
+    border-radius: $radius-xs;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+
+    &.inbound {
+      background: rgba(0, 180, 42, 0.12);
+      color: $color-success;
+    }
+
+    &.outbound {
+      background: rgba(25, 118, 210, 0.12);
+      color: $color-secondary;
+    }
+
+    &.exhausted {
+      background: rgba(255, 125, 0, 0.12);
+      color: $color-warning;
+    }
+
+    &.expired_lock,
+    &.manual_lock {
+      background: rgba(245, 63, 63, 0.12);
+      color: $color-error;
+    }
+
+    &.manual_unlock,
+    &.adjust {
+      background: rgba(134, 144, 156, 0.12);
+      color: $color-text-tertiary;
+    }
+  }
+
+  .logTime {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+  }
+}
+
+.logDetail {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+  margin-bottom: $spacing-sm;
+
+  .changeQty {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+
+    &.inbound {
+      color: $color-success;
+    }
+
+    &.outbound {
+      color: $color-secondary;
+    }
+
+    &.exhausted,
+    &.expired_lock,
+    &.manual_lock,
+    &.manual_unlock {
+      color: $color-text-tertiary;
+    }
+
+    &.adjust {
+      color: $color-text-secondary;
+    }
+  }
+
+  .balanceQty {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    font-weight: $font-weight-medium;
+    padding: 6rpx 16rpx;
+    background: $color-bg-page;
+    border-radius: $radius-xs;
+  }
+
+  .relatedNo {
+    font-size: $font-size-xs;
+    color: $color-secondary;
+    font-weight: $font-weight-medium;
+    text-decoration: underline;
+  }
+}
+
+.logMeta {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  line-height: 1.6;
+  background: $color-bg-page;
+  padding: $spacing-sm;
+  border-radius: $radius-xs;
+  margin-bottom: $spacing-sm;
+
+  .metaRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+
+    .metaItem {
+      display: inline-flex;
+      align-items: center;
+      gap: 4rpx;
+
+      .label {
+        color: $color-text-tertiary;
+      }
+    }
+  }
+}
+
+.batchTag {
+  position: absolute;
+  top: $spacing-md;
+  right: $spacing-md;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 55%;
+
+  .batchNoTag {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    padding: 4rpx 12rpx;
+    background: rgba(25, 118, 210, 0.08);
+    border-radius: $radius-xs;
+    @include text-ellipsis;
+    max-width: 180rpx;
+  }
+
+  .bloodBadge {
+    padding: 4rpx 14rpx;
+    border-radius: $radius-button;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: $color-text-white;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .statusBadge {
+    padding: 4rpx 14rpx;
+    border-radius: $radius-button;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: $color-text-white;
+    display: inline-flex;
+    align-items: center;
+
+    &.normal {
+      background: $color-success;
+    }
+
+    &.near_expiry {
+      background: $color-warning;
+    }
+
+    &.expired {
+      background: $color-error;
+    }
+
+    &.locked {
+      background: $color-text-tertiary;
+    }
+  }
+}
+
+.emptyState {
+  padding: $spacing-xl * 2 0;
+}

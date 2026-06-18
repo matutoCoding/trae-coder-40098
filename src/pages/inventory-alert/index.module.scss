@@ -1,0 +1,271 @@
+@use '../../styles/theme.scss' as *;
+@use '../../styles/variables.scss' as *;
+
+.alertPage {
+  min-height: 100vh;
+  padding: 0 $page-padding;
+  padding-bottom: 60rpx;
+  box-sizing: border-box;
+  background: $color-bg-page;
+}
+
+.header {
+  margin: $spacing-lg 0;
+  padding: $spacing-lg;
+  border-radius: $radius-lg;
+  background: linear-gradient(135deg, #F53F3F 0%, #E53935 50%, #C62828 100%);
+  color: #fff;
+  box-shadow: 0 8rpx 24rpx rgba(229, 57, 53, 0.25);
+
+  .headerTop {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-sm;
+  }
+
+  .headerIcon {
+    font-size: 48rpx;
+  }
+
+  .headerTitle {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+  }
+
+  .headerSub {
+    font-size: $font-size-sm;
+    opacity: 0.9;
+    line-height: 1.5;
+  }
+
+  .headerStats {
+    display: flex;
+    gap: $spacing-md;
+    margin-top: $spacing-md;
+  }
+
+  .headerStat {
+    flex: 1;
+    text-align: center;
+    padding: $spacing-sm;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: $radius-md;
+
+    .statValue {
+      display: block;
+      font-size: $font-size-xl;
+      font-weight: $font-weight-bold;
+    }
+
+    .statLabel {
+      font-size: $font-size-xs;
+      opacity: 0.85;
+    }
+  }
+}
+
+.alertGroup {
+  margin-bottom: $spacing-lg;
+
+  .groupHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-md;
+
+    .groupTitle {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      font-size: $font-size-lg;
+      font-weight: $font-weight-bold;
+      color: $color-text-primary;
+    }
+
+    .groupIcon {
+      font-size: 32rpx;
+    }
+  }
+
+  .groupHeader.red {
+    .groupTitle {
+      color: $color-error;
+    }
+  }
+
+  .groupHeader.orange {
+    .groupTitle {
+      color: $color-warning;
+    }
+  }
+
+  .groupHeader.gray {
+    .groupTitle {
+      color: $color-text-tertiary;
+    }
+  }
+
+  .countBadge {
+    padding: 4rpx 16rpx;
+    border-radius: $radius-round;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: #fff;
+  }
+
+  .countBadge.red {
+    background: linear-gradient(135deg, #F53F3F 0%, #E53935 100%);
+  }
+
+  .countBadge.orange {
+    background: linear-gradient(135deg, #FF7D00 0%, #FF9500 100%);
+  }
+
+  .countBadge.gray {
+    background: linear-gradient(135deg, #86909C 0%, #4E5969 100%);
+  }
+
+  .batchCardList {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+
+  .batchCard {
+    background: $color-bg-card;
+    border-radius: $radius-lg;
+    padding: $spacing-md $spacing-lg;
+    box-shadow: $shadow-card;
+    border-left: 8rpx solid transparent;
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    transition: all $transition-base;
+
+    &:active {
+      transform: scale(0.99);
+      background: $color-bg-hover;
+    }
+  }
+
+  .batchCard.red {
+    border-left-color: $color-error;
+    background: linear-gradient(to right, rgba(245, 63, 63, 0.04) 0%, #fff 30%);
+  }
+
+  .batchCard.orange {
+    border-left-color: $color-warning;
+    background: linear-gradient(to right, rgba(255, 125, 0, 0.04) 0%, #fff 30%);
+  }
+
+  .batchCard.gray {
+    border-left-color: $color-text-tertiary;
+    background: linear-gradient(to right, rgba(134, 144, 156, 0.06) 0%, #fff 30%);
+  }
+
+  .cardLeft {
+    flex: 1;
+    min-width: 0;
+
+    .batchNo {
+      font-size: $font-size-md;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+      margin-bottom: $spacing-xs;
+    }
+
+    .tagsRow {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      flex-wrap: wrap;
+    }
+  }
+
+  .cardCenter {
+    text-align: center;
+    min-width: 160rpx;
+
+    .expiryDate {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      margin-bottom: 4rpx;
+    }
+
+    .daysText {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      margin-bottom: 4rpx;
+    }
+
+    .daysText.red {
+      color: $color-error;
+    }
+
+    .daysText.orange {
+      color: $color-warning;
+    }
+
+    .daysText.gray {
+      color: $color-text-tertiary;
+    }
+
+    .remaining {
+      font-size: $font-size-xs;
+      color: $color-text-secondary;
+    }
+
+    .remainingHighlight {
+      font-weight: $font-weight-bold;
+      color: $color-error;
+    }
+  }
+
+  .cardRight {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+
+    .arrow {
+      font-size: $font-size-xl;
+      color: $color-text-disabled;
+    }
+
+    .detailBtn {
+      font-size: $font-size-xs;
+      color: $color-secondary;
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  .expiredWarn {
+    margin-top: $spacing-xs;
+    padding: $spacing-xs $spacing-sm;
+    border-radius: $radius-sm;
+    background: rgba(245, 63, 63, 0.1);
+    border: 1rpx solid rgba(245, 63, 63, 0.3);
+    color: $color-error;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+  }
+
+  .emptyGroup {
+    padding: $spacing-xl $spacing-lg;
+    text-align: center;
+    background: $color-bg-card;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-card;
+
+    .emptyIcon {
+      font-size: 56rpx;
+      margin-bottom: $spacing-sm;
+    }
+
+    .emptyText {
+      font-size: $font-size-sm;
+      color: $color-text-tertiary;
+    }
+  }
+}

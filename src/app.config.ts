@@ -9,7 +9,11 @@ export default defineAppConfig({
     'pages/batch-register/index',
     'pages/outbound-register/index',
     'pages/selfpay-apply/index',
-    'pages/selfpay-detail/index'
+    'pages/selfpay-detail/index',
+    'pages/donor-detail/index',
+    'pages/batch-detail/index',
+    'pages/inventory-tracker/index',
+    'pages/inventory-alert/index'
   ],
   window: {
     backgroundTextStyle: 'light',

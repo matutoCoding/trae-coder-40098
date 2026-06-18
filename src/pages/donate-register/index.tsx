@@ -38,6 +38,8 @@ const DonateRegisterPage: React.FC = () => {
   const [donorId, setDonorId] = useState<string>('');
   const [mode, setMode] = useState<SubmitMode>('quota');
   const [selfpayApplyNo, setSelfpayApplyNo] = useState<string>('');
+  const [selfpayStatus, setSelfpayStatus] = useState<'' | 'pending' | 'approved'>('');
+  const [submitDisabled, setSubmitDisabled] = useState(true);
 
   const router = Taro.useRouter();
   const { selfpayApplyId, prefillIdCard, prefillName } = router.params;
@@ -68,10 +70,24 @@ const DonateRegisterPage: React.FC = () => {
         if (apply.donorName) setName(apply.donorName);
         if (apply.donorIdCard) setIdCard(apply.donorIdCard);
         if (apply.donorBloodType) setBloodType(apply.donorBloodType);
-        if (apply.donorPhone) setPhone(apply.donorPhone);
+        const phoneVal = apply.donorPhone || apply.applicantPhone;
+        if (phoneVal) setPhone(phoneVal);
         if (apply.lastDonateDate) setLastDonateDate(apply.lastDonateDate);
         setMode('selfpayApply');
         setSelfpayApplyNo(apply.applyNo);
+        setSelfpayStatus('approved');
+
+        if (apply.donorIdCard) {
+          const donorFromStore = donors.find(d => d.idCard === apply.donorIdCard);
+          if (donorFromStore) {
+            setDonorId(donorFromStore.id);
+            if (donorFromStore.name) setName(donorFromStore.name);
+            if (donorFromStore.phone) setPhone(donorFromStore.phone);
+            if (donorFromStore.bloodType) setBloodType(donorFromStore.bloodType);
+            if (donorFromStore.lastDonateDate) setLastDonateDate(donorFromStore.lastDonateDate);
+          }
+        }
+        setSubmitDisabled(false);
       }
     }
   }, []);
@@ -288,29 +304,48 @@ const DonateRegisterPage: React.FC = () => {
         </Text>
 
         {hasDonorProfile ? (
-          <View style={{
-            padding: '12rpx 20rpx',
-            marginTop: '8rpx',
-            marginBottom: '16rpx',
-            background: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)',
-            borderRadius: '12rpx',
-            display: 'flex',
-            alignItems: 'center'
-          }}>
+          <View
+            style={{
+              padding: '12rpx 20rpx',
+              marginTop: '8rpx',
+              marginBottom: '16rpx',
+              background: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)',
+              borderRadius: '12rpx',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: (donorId || idCard) ? 'pointer' : 'default'
+            }}
+            onClick={() => {
+              if (donorId) {
+                Taro.navigateTo({ url: `/pages/donor-detail/index?id=${encodeURIComponent(donorId)}` });
+              } else if (idCard) {
+                Taro.navigateTo({ url: `/pages/donor-detail/index?idCard=${encodeURIComponent(idCard)}` });
+              }
+            }}
+          >
             <Text style={{ color: '#2E7D32', fontWeight: '600', fontSize: '26rpx' }}>
               📋 已登记档案 · 累计献血{donateCount}次
             </Text>
+            {(donorId || idCard) && (
+              <Text style={{ color: '#2E7D32', fontSize: '28rpx', fontWeight: '600' }}>›</Text>
+            )}
           </View>
         ) : (
-          <View style={{
-            padding: '12rpx 20rpx',
-            marginTop: '8rpx',
-            marginBottom: '16rpx',
-            background: 'linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%)',
-            borderRadius: '12rpx',
-            display: 'flex',
-            alignItems: 'center'
-          }}>
+          <View
+            style={{
+              padding: '12rpx 20rpx',
+              marginTop: '8rpx',
+              marginBottom: '16rpx',
+              background: 'linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%)',
+              borderRadius: '12rpx',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+            onClick={() => {
+              Taro.showToast({ title: '提交首次献血后可查看档案', icon: 'none' });
+            }}
+          >
             <Text style={{ color: '#F57C00', fontWeight: '600', fontSize: '26rpx' }}>
               ✨ 新建档案 · 首次献血
             </Text>
@@ -529,7 +564,7 @@ const DonateRegisterPage: React.FC = () => {
       <View className={styles.submitBar}>
         {mode === 'selfpayApply' ? (
           <View
-            className={classnames(styles.submitBtn, styles.warning, !intervalCheck.valid && styles.disabled)}
+            className={classnames(styles.submitBtn, styles.warning, (!intervalCheck.valid || submitDisabled) && styles.disabled)}
             onClick={() => doSubmit('selfpayApply')}
           >
             {!intervalCheck.valid

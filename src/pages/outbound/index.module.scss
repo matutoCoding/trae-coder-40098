@@ -39,6 +39,27 @@
     color: $color-text-secondary;
     line-height: 1.6;
   }
+
+  .trackerEntry {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12rpx 20rpx;
+    border-radius: $radius-button;
+    background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-light 100%);
+    color: $color-text-white;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    box-shadow: 0 4rpx 12rpx rgba(25, 118, 210, 0.25);
+    align-self: flex-start;
+    margin-top: 4rpx;
+
+    &:active {
+      transform: scale(0.97);
+      opacity: 0.9;
+    }
+  }
 }
 
 .tabBar {

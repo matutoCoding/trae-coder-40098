@@ -16,7 +16,8 @@ const HomePage: React.FC = () => {
     getQuotaByOrgId,
     getExpiringBatches,
     getFifoRecommendedBatches,
-    selfpayApplications
+    selfpayApplications,
+    bloodBatches
   } = useAppStore();
 
   const stats = useMemo(() => getDashboardStats(), [getDashboardStats]);
@@ -27,6 +28,20 @@ const HomePage: React.FC = () => {
     () => selfpayApplications.filter(a => a.status === 'pending'),
     [selfpayApplications]
   );
+
+  const alertCount7 = useMemo(
+    () => bloodBatches.filter(b => b.daysToExpiry <= 7 && b.daysToExpiry > 0 && b.remainingQuantity > 0).length,
+    [bloodBatches]
+  );
+  const alertCount30 = useMemo(
+    () => bloodBatches.filter(b => b.daysToExpiry > 7 && b.daysToExpiry <= 30 && b.remainingQuantity > 0).length,
+    [bloodBatches]
+  );
+  const alertCountExpired = useMemo(
+    () => bloodBatches.filter(b => b.status === 'expired' && b.remainingQuantity > 0).length,
+    [bloodBatches]
+  );
+  const alertTotal = alertCount7 + alertCount30 + alertCountExpired;
 
   const quickActions = [
     { icon: '🩸', label: '献血登记', iconClass: styles.icon1, path: '/pages/donate-register/index' },
@@ -90,6 +105,14 @@ const HomePage: React.FC = () => {
           value={stats.totalOutbound}
           unit="次"
           color="#FF7D00"
+        />
+        <StatCard
+          label="库存预警"
+          value={alertTotal}
+          unit="批"
+          color="#F53F3F"
+          trend={`7天${alertCount7}·30天${alertCount30}·过期${alertCountExpired}`}
+          onClick={() => Taro.navigateTo({ url: '/pages/inventory-alert/index' })}
         />
       </View>
 

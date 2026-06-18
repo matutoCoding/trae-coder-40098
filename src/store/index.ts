@@ -32,6 +32,10 @@ interface AppState {
   getExpiringBatches: () => BloodBatch[];
   getExpiredBatches: () => BloodBatch[];
   getFifoRecommendedBatches: () => BloodBatch[];
+  isBatchUsable: (batch: BloodBatch) => boolean;
+  getNearExpiryBatches: (days: number) => BloodBatch[];
+  getExpiredWithStockBatches: () => BloodBatch[];
+  getExhaustedBatches: () => BloodBatch[];
   addConsumption: (record: ConsumptionRecord) => void;
   addBloodBatch: (batch: BloodBatch) => void;
   addOutbound: (record: OutboundRecord) => void;
@@ -69,6 +73,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const totalBatches = state.bloodBatches.length;
     const nearExpiryCount = state.bloodBatches.filter(b => b.status === 'near_expiry').length;
     const expiredCount = state.bloodBatches.filter(b => b.status === 'expired').length;
+    const exhaustedCount = state.bloodBatches.filter(b => b.remainingQuantity === 0).length;
     const totalOutbound = state.outboundRecords.length;
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
@@ -80,7 +85,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const pendingApprovals = state.outboundRecords.filter(o => o.status === 'pending').length;
     return {
       totalQuota, usedQuota, remainingQuota, quotaUsageRate,
-      totalBatches, nearExpiryCount, expiredCount,
+      totalBatches, nearExpiryCount, expiredCount, exhaustedCount,
       totalOutbound, monthlyDonations, selfpayApplications, pendingApprovals
     };
   },
@@ -118,6 +123,25 @@ export const useAppStore = create<AppState>((set, get) => ({
         if (ea !== eb) return ea - eb;
         return new Date(a.collectionDate).getTime() - new Date(b.collectionDate).getTime();
       });
+  },
+
+  isBatchUsable: (batch) => {
+    return batch.status !== 'expired' && batch.status !== 'locked' && batch.remainingQuantity > 0;
+  },
+
+  getNearExpiryBatches: (days) => {
+    return get().bloodBatches
+      .filter(b => b.daysToExpiry > 0 && b.daysToExpiry <= days && b.remainingQuantity > 0);
+  },
+
+  getExpiredWithStockBatches: () => {
+    return get().bloodBatches
+      .filter(b => b.status === 'expired' && b.remainingQuantity > 0);
+  },
+
+  getExhaustedBatches: () => {
+    return get().bloodBatches
+      .filter(b => b.remainingQuantity === 0);
   },
 
   addConsumption: (record) => {
@@ -322,7 +346,13 @@ export const useAppStore = create<AppState>((set, get) => ({
       apply.approvalDate = new Date().toISOString().split('T')[0];
       const newList = [...state.selfpayApplications];
       newList[idx] = apply;
-      return { selfpayApplications: newList };
+      const newConsumptionRecords = state.consumptionRecords.map(r => {
+        if (r.selfpayApplyNo === apply.applyNo) {
+          return { ...r, selfpayStatus: 'approved' as const };
+        }
+        return r;
+      });
+      return { selfpayApplications: newList, consumptionRecords: newConsumptionRecords };
     });
   },
 
@@ -407,7 +437,13 @@ export const useAppStore = create<AppState>((set, get) => ({
       apply.rejectReason = rejectReason;
       const newList = [...state.selfpayApplications];
       newList[idx] = apply;
-      return { selfpayApplications: newList };
+      const newConsumptionRecords = state.consumptionRecords.map(r => {
+        if (r.selfpayApplyNo === apply.applyNo) {
+          return { ...r, selfpayStatus: 'rejected' as const };
+        }
+        return r;
+      });
+      return { selfpayApplications: newList, consumptionRecords: newConsumptionRecords };
     });
   }
 }));

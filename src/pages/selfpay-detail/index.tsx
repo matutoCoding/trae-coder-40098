@@ -17,11 +17,16 @@ const SelfpayDetailPage: React.FC = () => {
   const router = useRouter();
   const applyId = router.params.id as string;
 
-  const { selfpayApplications, approveSelfpayApply, rejectSelfpayApply } = useAppStore();
+  const { selfpayApplications, approveSelfpayApply, rejectSelfpayApply, consumptionRecords } = useAppStore();
 
   const apply = useMemo(() => {
     return selfpayApplications.find(a => a.id === applyId);
   }, [selfpayApplications, applyId]);
+
+  const linkedRecords = useMemo(() => {
+    if (!apply) return [];
+    return consumptionRecords.filter(r => r.selfpayApplyNo === apply.applyNo);
+  }, [apply, consumptionRecords]);
 
   const handleReject = () => {
     Taro.showModal({
@@ -203,6 +208,30 @@ const SelfpayDetailPage: React.FC = () => {
               </View>
             </View>
           </View>
+          {linkedRecords.length > 0 && (
+            <View
+              style={{
+                marginTop: '24rpx',
+                padding: '16rpx 20rpx',
+                background: 'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)',
+                borderRadius: '12rpx',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer'
+              }}
+              onClick={() => {
+                if (apply.donorIdCard) {
+                  Taro.navigateTo({ url: `/pages/donor-detail/index?idCard=${apply.donorIdCard}` });
+                }
+              }}
+            >
+              <Text style={{ color: '#1565C0', fontWeight: '600', fontSize: '26rpx' }}>
+                🩸 已关联献血记录：{linkedRecords.length}条
+              </Text>
+              <Text style={{ color: '#1565C0', fontSize: '28rpx', fontWeight: '600' }}>›</Text>
+            </View>
+          )}
         </View>
       )}
 

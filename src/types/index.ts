@@ -138,6 +138,7 @@ export interface DashboardStats {
   totalBatches: number;
   nearExpiryCount: number;
   expiredCount: number;
+  exhaustedCount?: number;
   totalOutbound: number;
   monthlyDonations: number;
   selfpayApplications: number;

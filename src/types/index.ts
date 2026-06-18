@@ -54,6 +54,9 @@ export interface ConsumptionRecord {
   id: string;
   donorId: string;
   donorName: string;
+  idCard?: string;
+  phone?: string;
+  lastDonateDate?: string;
   bloodType: BloodType;
   orgId: string;
   orgName: string;
@@ -65,6 +68,8 @@ export interface ConsumptionRecord {
   daysSinceLastDonate?: number;
   operator: string;
   remark?: string;
+  selfpayApplyNo?: string;
+  selfpayStatus?: ApplyStatus;
 }
 
 export interface BloodBatch {
@@ -92,6 +97,7 @@ export interface OutboundRecord {
   outboundDate: string;
   receiver: string;
   receiverDept: string;
+  receiverPhone?: string;
   purpose: string;
   status: OutboundStatus;
   isFifoRecommended: boolean;
@@ -105,6 +111,11 @@ export interface SelfpayApply {
   orgId: string;
   orgName: string;
   applicant: string;
+  applicantPhone?: string;
+  donorPhone?: string;
+  donorBloodType?: BloodType;
+  donorIdCard?: string;
+  lastDonateDate?: string;
   applyDate: string;
   exceedCount: number;
   reason: string;
@@ -112,6 +123,7 @@ export interface SelfpayApply {
   approver?: string;
   approvalDate?: string;
   approvalRemark?: string;
+  remark?: string;
 }
 
 export interface DashboardStats {

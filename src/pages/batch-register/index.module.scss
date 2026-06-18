@@ -1,97 +1,276 @@
-@use '@/styles/variables.scss' as *;
+@use '../../styles/theme.scss' as *;
+@use '../../styles/variables.scss' as *;
 
-.placeholderPage {
-  min-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48rpx $page-padding;
+.batchRegister {
+  min-height: 100vh;
+  padding: 0 $page-padding;
+  padding-bottom: 160rpx;
+  padding-top: $spacing-lg;
   box-sizing: border-box;
+  background: linear-gradient(180deg, rgba(25, 118, 210, 0.08) 0%, rgba(0, 180, 42, 0.03) 25%, $color-bg-page 40%);
+}
 
-  .iconBox {
-    width: 200rpx;
-    height: 200rpx;
-    border-radius: 50%;
-    background: rgba(25, 118, 210, 0.1);
+.formCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+}
+
+.formTitle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-lg;
+  padding-bottom: $spacing-md;
+  border-bottom: 1rpx solid $color-divider;
+
+  .icon { font-size: 36rpx; }
+}
+
+.formItem {
+  margin-bottom: $spacing-lg;
+  &:last-child { margin-bottom: 0; }
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+
+  .required { color: $color-error; }
+}
+
+.input {
+  height: 88rpx;
+  padding: 0 $spacing-md;
+  border-radius: $radius-sm;
+  background: $color-bg-input;
+  border: 2rpx solid transparent;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all $transition-base;
+  display: flex;
+  align-items: center;
+
+  &:focus-within {
+    border-color: $color-secondary;
+    background: $color-bg-card;
+    box-shadow: 0 0 0 4rpx rgba(25, 118, 210, 0.1);
+  }
+
+  input {
+    width: 100%; height: 100%;
+    background: transparent; border: none; outline: none;
+    font-size: $font-size-md;
+  }
+}
+
+.batchNoRow {
+  display: flex;
+  gap: $spacing-xs;
+  align-items: center;
+
+  .noInput { flex: 1; }
+  .regenBtn {
+    height: 88rpx;
+    padding: 0 $spacing-md;
+    border-radius: $radius-sm;
+    background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-light 100%);
+    color: $color-text-white;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 100rpx;
-    margin-bottom: 48rpx;
+    flex-shrink: 0;
+    transition: all $transition-base;
+    &:active { opacity: 0.85; transform: scale(0.98); }
   }
+}
 
-  .title {
-    font-size: 40rpx;
-    font-weight: 600;
-    color: $color-text-primary;
-    margin-bottom: 16rpx;
+.bloodTypeGroup {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.bloodTypeItem {
+  flex: 1;
+  height: 88rpx;
+  border-radius: $radius-sm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  border: 2rpx solid $color-divider;
+  color: $color-text-secondary;
+  background: $color-bg-input;
+  cursor: pointer;
+  transition: all $transition-base;
+
+  &.active {
+    color: $color-text-white;
+    border-color: transparent;
   }
+}
 
-  .desc {
-    font-size: 28rpx;
-    color: $color-text-secondary;
-    text-align: center;
-    line-height: 1.6;
-    margin-bottom: 48rpx;
-  }
+.selectField {
+  position: relative;
+  height: 88rpx;
+  padding: 0 $spacing-md;
+  border-radius: $radius-sm;
+  background: $color-bg-input;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  transition: all $transition-base;
+  border: 2rpx solid transparent;
 
-  .featureList {
-    width: 100%;
-    max-width: 600rpx;
+  &.active {
+    border-color: $color-secondary;
     background: $color-bg-card;
-    border-radius: $radius-lg;
-    padding: 32rpx;
-    box-shadow: $shadow-card;
-    margin-bottom: 48rpx;
-
-    .listTitle {
-      font-size: 28rpx;
-      font-weight: 600;
-      color: $color-text-primary;
-      margin-bottom: 24rpx;
-      padding-bottom: 16rpx;
-      border-bottom: 1rpx solid $color-divider;
-    }
-
-    .featureItem {
-      display: flex;
-      align-items: flex-start;
-      gap: 16rpx;
-      padding: 12rpx 0;
-
-      .dot {
-        width: 12rpx;
-        height: 12rpx;
-        border-radius: 50%;
-        background: $color-secondary;
-        flex-shrink: 0;
-        margin-top: 12rpx;
-      }
-
-      .text {
-        font-size: 26rpx;
-        color: $color-text-secondary;
-        line-height: 1.5;
-      }
-
-      .strong {
-        color: $color-secondary;
-        font-weight: 500;
-      }
-    }
+    box-shadow: 0 0 0 4rpx rgba(25, 118, 210, 0.1);
   }
 
-  .actionBtn {
-    @include button-reset;
-    width: 100%;
-    max-width: 600rpx;
-    height: 96rpx;
-    border-radius: $radius-button;
+  .placeholder { color: $color-text-placeholder; }
+  .arrow { color: $color-text-tertiary; font-size: 32rpx; }
+}
+
+.statusPreview {
+  display: flex;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  border-radius: $radius-sm;
+  margin-top: $spacing-md;
+  align-items: center;
+
+  &.normal {
+    background: rgba(0, 180, 42, 0.08);
+    border: 1rpx solid rgba(0, 180, 42, 0.2);
+    .statusLbl { color: $color-success; }
+  }
+  &.near {
+    background: rgba(255, 125, 0, 0.08);
+    border: 1rpx solid rgba(255, 125, 0, 0.2);
+    .statusLbl { color: $color-warning; }
+  }
+  &.expired {
+    background: rgba(245, 63, 63, 0.08);
+    border: 1rpx solid rgba(245, 63, 63, 0.2);
+    .statusLbl { color: $color-error; }
+  }
+
+  .statusIcon { font-size: 48rpx; }
+  .statusText {
+    flex: 1;
+    .statusLbl {
+      font-size: $font-size-md;
+      font-weight: $font-weight-semibold;
+      margin-bottom: 4rpx;
+      display: block;
+    }
+    .statusDesc {
+      font-size: $font-size-xs;
+      color: $color-text-secondary;
+      line-height: 1.5;
+    }
+  }
+}
+
+.sitesBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+}
+
+.siteTag {
+  padding: 16rpx 24rpx;
+  border-radius: $radius-button;
+  background: $color-bg-input;
+  border: 2rpx solid $color-divider;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  transition: all $transition-base;
+
+  &.active {
     background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-light 100%);
     color: $color-text-white;
-    font-size: 32rpx;
-    font-weight: 600;
-    box-shadow: 0 8rpx 24rpx rgba(25, 118, 210, 0.25);
+    border-color: transparent;
+    font-weight: $font-weight-semibold;
+    box-shadow: 0 4rpx 12rpx rgba(25, 118, 210, 0.25);
   }
+}
+
+.textAreaField {
+  min-height: 160rpx;
+  padding: $spacing-md;
+  border-radius: $radius-sm;
+  background: $color-bg-input;
+  border: 2rpx solid transparent;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  width: 100%;
+  box-sizing: border-box;
+  resize: none;
+  transition: all $transition-base;
+
+  &:focus {
+    border-color: $color-secondary;
+    background: $color-bg-card;
+    outline: none;
+    box-shadow: 0 0 0 4rpx rgba(25, 118, 210, 0.1);
+  }
+}
+
+.submitBar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+  background: $color-bg-card;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: $spacing-sm;
+  z-index: 100;
+}
+
+.submitBtn {
+  @include button-reset;
+  flex: 1;
+  height: 96rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-light 100%);
+  color: $color-text-white;
+  box-shadow: 0 8rpx 20rpx rgba(25, 118, 210, 0.25);
+
+  &.disabled {
+    background: #C9CDD4;
+    box-shadow: none;
+  }
+}
+
+.cancelBtn {
+  @include button-reset;
+  height: 96rpx;
+  padding: 0 $spacing-lg;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  background: $color-bg-input;
+  color: $color-text-secondary;
 }

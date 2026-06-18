@@ -128,3 +128,14 @@ $transition-slow: 0.35s ease;
     border: none;
   }
 }
+
+// ============================================
+// 表单与输入框相关变量（业务扩展）
+// ============================================
+$color-bg-input: #F7F8FA;
+$color-border-input: #E5E6EB;
+$color-shadow-focus: rgba(25, 118, 210, 0.18);
+$input-height-md: 80rpx;
+$input-height-lg: 96rpx;
+$font-weight-regular: $font-weight-normal;
+$color-text-placeholder: $color-text-tertiary;
